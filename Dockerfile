@@ -1,0 +1,24 @@
+FROM golang:1.24-alpine3.21 AS builder
+
+ARG VERSION=dev
+
+COPY cert-manager /go/src/app
+WORKDIR /go/src/app
+
+RUN GOOS=linux go build -o bin -ldflags="-X 'main.version=$VERSION'" main.go
+
+FROM nginx:1.27.5-alpine
+
+RUN mkdir -p /opt/certs
+RUN mkdir -p /opt/cert-manager
+COPY --from=builder /go/src/app/bin /opt/cert-manager/bin
+COPY include/certs /opt/certs
+COPY include/config/nginx.conf /etc/nginx/nginx.conf
+COPY include/config/templates /etc/nginx/templates
+COPY include/docker-entrypoint.sh /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+STOPSIGNAL SIGQUIT
+
+CMD ["nginx", "-g", "'daemon off;'"]

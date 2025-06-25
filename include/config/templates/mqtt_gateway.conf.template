@@ -1,0 +1,12 @@
+upstream backend {
+    server ${CLOUD_MQTT_HOST}:${CLOUD_MQTT_PORT};
+}
+server {
+    server_name mqtt-gateway;
+    listen ${MQTT_GATEWAY_PORT};
+    proxy_pass backend;
+    proxy_ssl  on;
+    proxy_ssl_certificate /opt/certs/client.pem;
+    proxy_ssl_certificate_key /opt/certs/client.key;
+    proxy_ssl_session_reuse on;
+}

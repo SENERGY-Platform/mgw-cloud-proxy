@@ -1,0 +1,16 @@
+upstream ${CLOUD_API_HOST} {
+    server ${CLOUD_API_HOST}:${CLOUD_API_PORT};
+    keepalive 4;
+}
+server {
+    server_name api-gateway;
+    listen ${API_GATEWAY_PORT};
+    location / {
+        proxy_pass https://${CLOUD_API_HOST}$request_uri;
+        proxy_ssl_certificate /opt/certs/client.pem;
+        proxy_ssl_certificate_key /opt/certs/client.key;
+        proxy_ssl_session_reuse on;
+        proxy_ssl_server_name on;
+        proxy_set_header Host ${CLOUD_API_HOST};
+    }
+}
