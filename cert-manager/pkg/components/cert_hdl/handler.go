@@ -44,14 +44,16 @@ const (
 type Handler struct {
 	caCltToken certificateAuthorityClient
 	caCltCert  certificateAuthorityClient
+	logger     logger
 	config     Config
 	mu         sync.RWMutex
 }
 
-func New(caClientToken, caClientCert certificateAuthorityClient, config Config) *Handler {
+func New(caClientToken, caClientCert certificateAuthorityClient, logger logger, config Config) *Handler {
 	return &Handler{
 		caCltToken: caClientToken,
 		caCltCert:  caClientCert,
+		logger:     logger,
 		config:     config,
 	}
 }
