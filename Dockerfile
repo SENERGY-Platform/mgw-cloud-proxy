@@ -10,9 +10,11 @@ RUN GOOS=linux go build -o bin -ldflags="-X 'main.version=$VERSION'" main.go
 FROM nginx:1.27.5-alpine
 
 RUN mkdir -p /opt/certs
+RUN mkdir -p /opt/dummy-certs
 RUN mkdir -p /opt/cert-manager
 COPY --from=builder /go/src/app/bin /opt/cert-manager/bin
 COPY include/certs /opt/certs
+COPY include/certs /opt/dummy-certs
 COPY include/config/nginx.conf /etc/nginx/nginx.conf
 COPY include/config/templates /etc/nginx/templates
 COPY include/docker-entrypoint.sh /docker-entrypoint.sh
