@@ -17,8 +17,19 @@
 package service
 
 import (
+	"context"
 	"github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models"
+	"time"
 )
+
+type certificateHandler interface {
+	Info(ctx context.Context) (models.CertInfo, error)
+	New(ctx context.Context, dn models.DistinguishedName, subAltNames []string, validityPeriod time.Duration, userPrivateKey []byte, token string) error
+	Renew(ctx context.Context, dn models.DistinguishedName, subAltNames []string, validityPeriod time.Duration, token string) error
+	Clear(ctx context.Context, reason, token string) error
+	Deploy(ctx context.Context) error
+}
 
 type serviceInfoHandler interface {
 	ServiceInfo() srv_info_hdl.ServiceInfo
