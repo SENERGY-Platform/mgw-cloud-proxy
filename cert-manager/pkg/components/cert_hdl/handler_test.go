@@ -469,14 +469,6 @@ func TestHandler_Clear(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		workDir := t.TempDir()
 		targetDir := t.TempDir()
-		err := copyFile(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
-		if err != nil {
-			t.Fatal(err)
-		}
-		err = copyFile(path.Join("./test", certFile), path.Join(workDir, certFile), certFilePerm)
-		if err != nil {
-			t.Fatal(err)
-		}
 		mockClient := &caClientMock{
 			Subject:    pkix.Name{SerialNumber: "test"},
 			Hostnames:  []string{"test"},
@@ -490,7 +482,7 @@ func TestHandler_Clear(t *testing.T) {
 			TargetDirPath: targetDir,
 			DummyDirPath:  "./test",
 		})
-		err = h.Revoke(context.Background(), "unspecified", "")
+		err := h.Clear(context.Background(), "unspecified", "")
 		if err == nil {
 			t.Error("expected error")
 		}
