@@ -9,7 +9,9 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models"
+	"io"
 	"os"
 	"path"
 	"reflect"
@@ -20,7 +22,7 @@ import (
 func TestHandler_Deploy(t *testing.T) {
 	workDir := t.TempDir()
 	targetDir := t.TempDir()
-	h := New(nil, nil, Config{
+	h := New(nil, nil, &loggerMock{Writer: os.Stdout}, Config{
 		WorkDirPath:   workDir,
 		TargetDirPath: targetDir,
 	})
@@ -96,7 +98,7 @@ func TestHandler_New(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, Config{
+		h := New(mockClient, nil, &loggerMock{Writer: os.Stdout}, Config{
 			WorkDirPath:         workDir,
 			TargetDirPath:       targetDir,
 			PrivateKeyAlgorithm: algoRSA,
@@ -160,7 +162,7 @@ func TestHandler_New(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, Config{
+		h := New(mockClient, nil, &loggerMock{Writer: os.Stdout}, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -212,7 +214,7 @@ func TestHandler_New(t *testing.T) {
 			T:          t,
 			Err:        errors.New("test"),
 		}
-		h := New(mockClient, nil, Config{
+		h := New(mockClient, nil, &loggerMock{Writer: os.Stdout}, Config{
 			WorkDirPath:         workDir,
 			TargetDirPath:       targetDir,
 			PrivateKeyAlgorithm: algoRSA,
@@ -239,7 +241,7 @@ func TestHandler_Renew(t *testing.T) {
 			Reason:     "superseded",
 			T:          t,
 		}
-		h := New(nil, mockClient, Config{
+		h := New(nil, mockClient, &loggerMock{Writer: os.Stdout}, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -283,7 +285,7 @@ func TestHandler_Renew(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, Config{
+		h := New(mockClient, nil, &loggerMock{Writer: os.Stdout}, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -326,7 +328,7 @@ func TestHandler_Renew(t *testing.T) {
 			T:          t,
 			Err:        errors.New("test"),
 		}
-		h := New(nil, mockClient, Config{
+		h := New(nil, mockClient, &loggerMock{Writer: os.Stdout}, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -356,12 +358,12 @@ func TestHandler_Revoke(t *testing.T) {
 			Reason:     "unspecified",
 			T:          t,
 		}
-		h := New(nil, mockClient, Config{
+		h := New(nil, mockClient, &loggerMock{Writer: os.Stdout}, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 			DummyDirPath:  "./test",
 		})
-		err = h.Revoke(context.Background(), "unspecified", "")
+		err = h.Clear(context.Background(), "unspecified", "")
 		if err != nil {
 			t.Error(err)
 		}
@@ -420,12 +422,12 @@ func TestHandler_Revoke(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, Config{
+		h := New(mockClient, nil, &loggerMock{Writer: os.Stdout}, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 			DummyDirPath:  "./test",
 		})
-		err = h.Revoke(context.Background(), "unspecified", "test")
+		err = h.Clear(context.Background(), "unspecified", "test")
 		if err != nil {
 			t.Error(err)
 		}
@@ -483,7 +485,7 @@ func TestHandler_Revoke(t *testing.T) {
 			T:          t,
 			Err:        errors.New("test"),
 		}
-		h := New(nil, mockClient, Config{
+		h := New(nil, mockClient, &loggerMock{Writer: os.Stdout}, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 			DummyDirPath:  "./test",
@@ -568,4 +570,12 @@ func (m *caClientMock) Revoke(cert *x509.Certificate, reason string, token *stri
 		m.T.Errorf("expected %v, got %v", m.Token, *token)
 	}
 	return 0, nil
+}
+
+type loggerMock struct {
+	Writer io.Writer
+}
+
+func (m *loggerMock) Error(msg string, args ...any) {
+	fmt.Fprintln(m.Writer, "ERROR", msg, args)
 }
