@@ -14,6 +14,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models"
 	"io"
 	"os"
@@ -169,7 +170,7 @@ func (h *Handler) Renew(_ context.Context, dn models.DistinguishedName, subAltNa
 		return models.NewInternalError(err)
 	}
 	if _, err = caClt.Revoke(cert, "superseded", &token); err != nil {
-		return models.NewInternalError(err)
+		h.logger.Error("revoking certificate failed", attributes.ErrorKey, err)
 	}
 	return nil
 }
@@ -203,7 +204,7 @@ func (h *Handler) Clear(_ context.Context, reason, token string) error {
 		caClt = h.caCltToken
 	}
 	if _, err = caClt.Revoke(cert, reason, &token); err != nil {
-		return models.NewInternalError(err)
+		h.logger.Error("revoking certificate failed", attributes.ErrorKey, err)
 	}
 	return nil
 }
