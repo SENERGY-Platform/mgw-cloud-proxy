@@ -174,7 +174,7 @@ func (h *Handler) Renew(_ context.Context, dn models.DistinguishedName, subAltNa
 	return nil
 }
 
-func (h *Handler) Revoke(_ context.Context, reason, token string) error {
+func (h *Handler) Clear(_ context.Context, reason, token string) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	certPath := path.Join(h.config.WorkDirPath, certFile)

@@ -339,7 +339,7 @@ func TestHandler_Renew(t *testing.T) {
 	})
 }
 
-func TestHandler_Revoke(t *testing.T) {
+func TestHandler_Clear(t *testing.T) {
 	t.Run("auth with cert", func(t *testing.T) {
 		workDir := t.TempDir()
 		targetDir := t.TempDir()
