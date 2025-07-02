@@ -23,7 +23,7 @@ func TestHandler_Deploy(t *testing.T) {
 	InitLogger(slog.Default())
 	workDir := t.TempDir()
 	targetDir := t.TempDir()
-	h := New(nil, nil, Config{
+	h := New(nil, Config{
 		WorkDirPath:   workDir,
 		TargetDirPath: targetDir,
 	})
@@ -100,10 +100,10 @@ func TestHandler_New(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, Config{
+		h := New(mockClient, Config{
 			WorkDirPath:         workDir,
 			TargetDirPath:       targetDir,
-			PrivateKeyAlgorithm: algoRSA,
+			PrivateKeyAlgorithm: models_cert.AlgoRSA,
 		})
 		err := h.New(context.Background(), models_cert.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, nil, "test")
 		if err != nil {
@@ -118,7 +118,7 @@ func TestHandler_New(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !mockClient.PrivateKey.Equal(key.(*rsa.PrivateKey)) {
+		if !mockClient.PrivateKey.(*rsa.PrivateKey).Equal(key.(*rsa.PrivateKey)) {
 			t.Error("private keys don't match")
 		}
 		a, err := os.ReadFile(path.Join(workDir, certFile))
@@ -164,7 +164,7 @@ func TestHandler_New(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, Config{
+		h := New(mockClient, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -216,10 +216,10 @@ func TestHandler_New(t *testing.T) {
 			T:          t,
 			Err:        errors.New("test"),
 		}
-		h := New(mockClient, nil, Config{
+		h := New(mockClient, Config{
 			WorkDirPath:         workDir,
 			TargetDirPath:       targetDir,
-			PrivateKeyAlgorithm: algoRSA,
+			PrivateKeyAlgorithm: models_cert.AlgoRSA,
 		})
 		err := h.New(context.Background(), models_cert.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, nil, "test")
 		if err == nil {
@@ -243,7 +243,7 @@ func TestHandler_Renew(t *testing.T) {
 			Reason:     "superseded",
 			T:          t,
 		}
-		h := New(nil, mockClient, Config{
+		h := New(mockClient, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -287,7 +287,7 @@ func TestHandler_Renew(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, Config{
+		h := New(mockClient, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -330,7 +330,7 @@ func TestHandler_Renew(t *testing.T) {
 			T:          t,
 			Err:        errors.New("test"),
 		}
-		h := New(nil, mockClient, Config{
+		h := New(mockClient, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -361,7 +361,7 @@ func TestHandler_Clear(t *testing.T) {
 			Reason:     "unspecified",
 			T:          t,
 		}
-		h := New(nil, mockClient, Config{
+		h := New(mockClient, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 			DummyDirPath:  "./test",
@@ -425,7 +425,7 @@ func TestHandler_Clear(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, Config{
+		h := New(mockClient, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 			DummyDirPath:  "./test",
@@ -480,7 +480,7 @@ func TestHandler_Clear(t *testing.T) {
 			T:          t,
 			Err:        errors.New("test"),
 		}
-		h := New(nil, mockClient, Config{
+		h := New(mockClient, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 			DummyDirPath:  "./test",
@@ -493,7 +493,7 @@ func TestHandler_Clear(t *testing.T) {
 }
 
 type caClientMock struct {
-	PrivateKey *rsa.PrivateKey
+	PrivateKey any
 	Subject    pkix.Name
 	Hostnames  []string
 	Expiration time.Duration
@@ -505,26 +505,23 @@ type caClientMock struct {
 	T          *testing.T
 }
 
-func (m *caClientMock) NewCertFromKey(privateKey *rsa.PrivateKey, subj pkix.Name, hostnames []string, expiration time.Duration, token *string) (*x509.Certificate, int, error) {
+func (m *caClientMock) NewCertFromKey(key any, subj pkix.Name, subAltNames []string, validityPeriod time.Duration, token string) (*x509.Certificate, error) {
 	m.CallCount++
 	if m.Err != nil {
-		return nil, 0, m.Err
+		return nil, m.Err
 	}
-	if privateKey == nil {
-		m.T.Error("expected non nil private key")
-	}
-	m.PrivateKey = privateKey
+	m.PrivateKey = key
 	if !reflect.DeepEqual(subj, m.Subject) {
 		m.T.Errorf("expected %v, got %v", m.Subject, subj)
 	}
-	if !reflect.DeepEqual(hostnames, m.Hostnames) {
-		m.T.Errorf("expected %v, got %v", m.Hostnames, hostnames)
+	if !reflect.DeepEqual(subAltNames, m.Hostnames) {
+		m.T.Errorf("expected %v, got %v", m.Hostnames, subAltNames)
 	}
-	if expiration != m.Expiration {
-		m.T.Errorf("expected %v, got %v", m.Expiration, expiration)
+	if validityPeriod != m.Expiration {
+		m.T.Errorf("expected %v, got %v", m.Expiration, validityPeriod)
 	}
-	if m.UseToken && *token != m.Token {
-		m.T.Errorf("expected %v, got %v", m.Token, *token)
+	if m.UseToken && token != m.Token {
+		m.T.Errorf("expected %v, got %v", m.Token, token)
 	}
 	b, err := os.ReadFile("./test/client.crt")
 	if err != nil {
@@ -538,13 +535,13 @@ func (m *caClientMock) NewCertFromKey(privateKey *rsa.PrivateKey, subj pkix.Name
 	if err != nil {
 		m.T.Fatal(err)
 	}
-	return cert, 0, nil
+	return cert, nil
 }
 
-func (m *caClientMock) Revoke(cert *x509.Certificate, reason string, token *string) (int, error) {
+func (m *caClientMock) Revoke(cert *x509.Certificate, reason string, token string) error {
 	m.CallCount++
 	if m.Err != nil {
-		return 0, m.Err
+		return m.Err
 	}
 	b, err := os.ReadFile(path.Join("./test", certFile))
 	if err != nil {
@@ -561,8 +558,8 @@ func (m *caClientMock) Revoke(cert *x509.Certificate, reason string, token *stri
 	if reason != m.Reason {
 		m.T.Errorf("expected %v, got %v", m.Reason, reason)
 	}
-	if m.UseToken && *token != m.Token {
-		m.T.Errorf("expected %v, got %v", m.Token, *token)
+	if m.UseToken && token != m.Token {
+		m.T.Errorf("expected %v, got %v", m.Token, token)
 	}
-	return 0, nil
+	return nil
 }

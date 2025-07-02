@@ -1,3 +1,5 @@
+github.com/SENERGY-Platform/cert-certificate-authority v0.0.9 h1:3oNVgHYOwTbi1GoUtODpyG3bTgJYPxIygkpovmr5gBk=
+github.com/SENERGY-Platform/cert-certificate-authority v0.0.9/go.mod h1:GKQjcf+E3UjC7xfHiJEaMp+NZLyUjqbW9wZpYKYTxus=
 github.com/SENERGY-Platform/gin-middleware v0.9.0 h1:1qE19YozfRnpHSfv2INLju7oZ9j+LoubtuCLW5oXSuQ=
 github.com/SENERGY-Platform/gin-middleware v0.9.0/go.mod h1:txJcOsdkT3M/X1XucUaBjqkdBDlIB6A9tVUbV9SEsRE=
 github.com/SENERGY-Platform/go-env-loader v0.5.3 h1:sNM/psxYBs3DeDCw8P8gWM2hvySijwy9t2DdSGdhF1c=
@@ -13,6 +15,8 @@ github.com/bytedance/sonic v1.13.2/go.mod h1:o68xyaF9u2gvVBuGHPlUVCy+ZfmNNO5ETf1
 github.com/bytedance/sonic/loader v0.1.1/go.mod h1:ncP89zfokxS5LZrJxl5z0UJcsk4M4yY2JpfqGeCtNLU=
 github.com/bytedance/sonic/loader v0.2.4 h1:ZWCw4stuXUsn1/+zQDqeE7JKP+QO47tz7QCNan80NzY=
 github.com/bytedance/sonic/loader v0.2.4/go.mod h1:N8A3vUdtUebEY2/VQC0MyhYeKUFosQU6FxH2JmUe6VI=
+github.com/cloudflare/cfssl v1.6.5 h1:46zpNkm6dlNkMZH/wMW22ejih6gIaJbzL2du6vD7ZeI=
+github.com/cloudflare/cfssl v1.6.5/go.mod h1:Bk1si7sq8h2+yVEDrFJiz3d7Aw+pfjjJSZVaD+Taky4=
 github.com/cloudwego/base64x v0.1.5 h1:XPciSp1xaq2VCSt6lF0phncD4koWyULpl5bUxbfCyP4=
 github.com/cloudwego/base64x v0.1.5/go.mod h1:0zlkT4Wn5C6NdauXdJRhSKRlJvmclQ1hhJgA0rcu/8w=
 github.com/cloudwego/iasm v0.2.0/go.mod h1:8rXZaNYT2n95jn+zTI1sDr+IgcD2GVs0nlbbQPiEFhY=

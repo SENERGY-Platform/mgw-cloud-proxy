@@ -36,25 +36,16 @@ const (
 	certFilePerm = 0660
 )
 
-const (
-	algoRSA     = "RSA"
-	algoECDH    = "ECDH"
-	algoECDSA   = "ECDSA"
-	algoEd25519 = "Ed25519"
-)
-
 type Handler struct {
-	caCltToken certificateAuthorityClient
-	caCltCert  certificateAuthorityClient
-	config     Config
-	mu         sync.RWMutex
+	caClt  certificateAuthorityClient
+	config Config
+	mu     sync.RWMutex
 }
 
-func New(caClientToken, caClientCert certificateAuthorityClient, config Config) *Handler {
+func New(caClient certificateAuthorityClient, config Config) *Handler {
 	return &Handler{
-		caCltToken: caClientToken,
-		caCltCert:  caClientCert,
-		config:     config,
+		caClt:  caClient,
+		config: config,
 	}
 }
 
@@ -122,7 +113,7 @@ func (h *Handler) New(_ context.Context, dn models_cert.DistinguishedName, subAl
 	if err != nil {
 		return models_error.NewInternalError(err)
 	}
-	cert, err := getNewCert(h.caCltToken, newPkixName(dn), subAltNames, validityPeriod, privateKey, token)
+	cert, err := h.caClt.NewCertFromKey(privateKey, newPkixName(dn), subAltNames, validityPeriod, token)
 	if err != nil {
 		return models_error.NewInternalError(err)
 	}
@@ -146,11 +137,7 @@ func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, sub
 	if err != nil {
 		return models_error.NewInternalError(err)
 	}
-	caClt := h.caCltCert
-	if token != "" {
-		caClt = h.caCltToken
-	}
-	cert, err := getNewCert(caClt, newPkixName(dn), subAltNames, validityPeriod, privateKey, token)
+	cert, err := h.caClt.NewCertFromKey(privateKey, newPkixName(dn), subAltNames, validityPeriod, token)
 	if err != nil {
 		return models_error.NewInternalError(err)
 	}
@@ -168,7 +155,7 @@ func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, sub
 	if err = h.deploy(); err != nil {
 		return models_error.NewInternalError(err)
 	}
-	if _, err = caClt.Revoke(cert, "superseded", &token); err != nil {
+	if err = h.caClt.Revoke(cert, "superseded", token); err != nil {
 		logger.Error("revoking certificate failed", attributes.ErrorKey, err)
 	}
 	return nil
@@ -198,11 +185,7 @@ func (h *Handler) Clear(_ context.Context, reason, token string) error {
 	if err = copyKeyAndCertFiles(h.config.DummyDirPath, h.config.TargetDirPath); err != nil {
 		return models_error.NewInternalError(err)
 	}
-	caClt := h.caCltCert
-	if token != "" {
-		caClt = h.caCltToken
-	}
-	if _, err = caClt.Revoke(cert, reason, &token); err != nil {
+	if err = h.caClt.Revoke(cert, reason, token); err != nil {
 		logger.Error("revoking certificate failed", attributes.ErrorKey, err)
 	}
 	return nil
@@ -240,49 +223,20 @@ func (h *Handler) deploy() error {
 	return nil
 }
 
-func getNewCert(client certificateAuthorityClient, dn pkix.Name, subAltNames []string, validityPeriod time.Duration, prvKey any, token string) (*x509.Certificate, error) {
-	key, err := privateKeyForCA(prvKey)
-	if err != nil {
-		return nil, err
-	}
-	// following client method does not implement a timeout
-	cert, _, err := client.NewCertFromKey(key, dn, subAltNames, validityPeriod, &token)
-	if err != nil {
-		return nil, err
-	}
-	return cert, nil
-}
-
 func newPrivateKey(algo string) (key any, err error) {
 	switch strings.ToUpper(algo) {
-	case algoRSA:
+	case models_cert.AlgoRSA:
 		key, err = rsa.GenerateKey(rand.Reader, 4096)
-	case algoECDH:
+	case models_cert.AlgoECDH:
 		key, err = ecdh.P521().GenerateKey(rand.Reader)
-	case algoECDSA:
+	case models_cert.AlgoECDSA:
 		key, err = ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
-	case algoEd25519:
+	case models_cert.AlgoEd25519:
 		key, _, err = ed25519.GenerateKey(rand.Reader)
 	default:
 		err = fmt.Errorf("algorithm '%s' not supported", algo)
 	}
 	return
-}
-
-func privateKeyForCA(key any) (*rsa.PrivateKey, error) {
-	errFormat := "algorithm %s not supported by backend"
-	switch pk := key.(type) {
-	case *rsa.PrivateKey:
-		return pk, nil
-	case *ecdh.PrivateKey:
-		return nil, fmt.Errorf(errFormat, algoECDH)
-	case *ecdsa.PrivateKey:
-		return nil, fmt.Errorf(errFormat, algoECDSA)
-	case ed25519.PrivateKey:
-		return nil, fmt.Errorf(errFormat, algoEd25519)
-	default:
-		return nil, errors.New("algorithm not supported")
-	}
 }
 
 func newDN(n pkix.Name) models_cert.DistinguishedName {

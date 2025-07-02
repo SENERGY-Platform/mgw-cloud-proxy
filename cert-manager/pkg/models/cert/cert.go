@@ -2,6 +2,13 @@ package cert
 
 import "time"
 
+const (
+	AlgoRSA     = "RSA"
+	AlgoECDH    = "ECDH"
+	AlgoECDSA   = "ECDSA"
+	AlgoEd25519 = "Ed25519"
+)
+
 type Info struct {
 	Version            int               `json:"version"`
 	SerialNumber       string            `json:"serial_number"`
