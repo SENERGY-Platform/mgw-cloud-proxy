@@ -566,11 +566,3 @@ func (m *caClientMock) Revoke(cert *x509.Certificate, reason string, token *stri
 	}
 	return 0, nil
 }
-
-type loggerMock struct {
-	Writer io.Writer
-}
-
-func (m *loggerMock) Error(msg string, args ...any) {
-	fmt.Fprintln(m.Writer, "ERROR", msg, args)
-}
