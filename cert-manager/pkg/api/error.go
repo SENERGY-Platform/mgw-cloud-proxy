@@ -18,28 +18,28 @@ package api
 
 import (
 	"errors"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models"
+	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/error"
 	"net/http"
 )
 
 func GetStatusCode(err error) int {
-	var nfe *models.NotFoundError
+	var nfe *models_error.NotFoundError
 	if errors.As(err, &nfe) {
 		return http.StatusNotFound
 	}
-	var iie *models.InvalidInputError
+	var iie *models_error.InvalidInputError
 	if errors.As(err, &iie) {
 		return http.StatusBadRequest
 	}
-	var ie *models.InternalError
+	var ie *models_error.InternalError
 	if errors.As(err, &ie) {
 		return http.StatusInternalServerError
 	}
-	var fe *models.ForbiddenError
+	var fe *models_error.ForbiddenError
 	if errors.As(err, &fe) {
 		return http.StatusForbidden
 	}
-	var rbe *models.ResourceBusyError
+	var rbe *models_error.ResourceBusyError
 	if errors.As(err, &rbe) {
 		return http.StatusConflict
 	}

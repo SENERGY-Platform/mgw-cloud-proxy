@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models
+package error
 
 type cError struct {
 	err error

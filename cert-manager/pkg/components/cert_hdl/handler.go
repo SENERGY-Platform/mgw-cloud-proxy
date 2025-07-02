@@ -15,8 +15,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
+	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/error"
 	"io"
 	"os"
 	"path"
@@ -72,13 +72,13 @@ func (h *Handler) Info(_ context.Context) (models_cert.Info, error) {
 	block, err := readPemFile(path.Join(h.config.WorkDirPath, certFile))
 	if err != nil {
 		if os.IsNotExist(err) {
-			return models_cert.Info{}, models.NewNotFoundError(errors.New("certificate not found"))
+			return models_cert.Info{}, models_error.NewNotFoundError(errors.New("certificate not found"))
 		}
-		return models_cert.Info{}, models.NewInternalError(err)
+		return models_cert.Info{}, models_error.NewInternalError(err)
 	}
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
-		return models_cert.Info{}, models.NewInternalError(err)
+		return models_cert.Info{}, models_error.NewInternalError(err)
 	}
 	return models_cert.Info{
 		Version:            cert.Version,
@@ -101,36 +101,36 @@ func (h *Handler) New(_ context.Context, dn models_cert.DistinguishedName, subAl
 	if len(userPrivateKey) > 0 {
 		pemBlock, _ := pem.Decode(userPrivateKey)
 		if pemBlock == nil {
-			return models.NewInvalidInputError(errors.New("no pem formatted block found"))
+			return models_error.NewInvalidInputError(errors.New("no pem formatted block found"))
 		}
 		privateKey, err = x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
 		if err != nil {
-			return models.NewInvalidInputError(err)
+			return models_error.NewInvalidInputError(err)
 		}
 		if pk, ok := privateKey.(*rsa.PrivateKey); ok {
 			if err = pk.Validate(); err != nil {
-				return models.NewInvalidInputError(err)
+				return models_error.NewInvalidInputError(err)
 			}
 		}
 	} else {
 		privateKey, err = newPrivateKey(h.config.PrivateKeyAlgorithm)
 		if err != nil {
-			return models.NewInternalError(err)
+			return models_error.NewInternalError(err)
 		}
 	}
 	keyBlock, err := privateKeyToPemBlock(privateKey)
 	if err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	cert, err := getNewCert(h.caCltToken, newPkixName(dn), subAltNames, validityPeriod, privateKey, token)
 	if err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	if err = writeKeyAndCertPemFiles(h.config.WorkDirPath, keyBlock, certToPemBlock(cert)); err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	if err = h.deploy(); err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	return nil
 }
@@ -140,11 +140,11 @@ func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, sub
 	defer h.mu.Unlock()
 	keyBlock, err := readPemFile(path.Join(h.config.WorkDirPath, keyFile))
 	if err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	privateKey, err := x509.ParsePKCS8PrivateKey(keyBlock.Bytes)
 	if err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	caClt := h.caCltCert
 	if token != "" {
@@ -152,21 +152,21 @@ func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, sub
 	}
 	cert, err := getNewCert(caClt, newPkixName(dn), subAltNames, validityPeriod, privateKey, token)
 	if err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	certPath := path.Join(h.config.WorkDirPath, certFile)
 	certBkPath, err := createBackupFile(certPath, certFilePerm)
 	if err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	if err = writePemFile(certPath, certToPemBlock(cert), certFilePerm); err != nil {
 		if e := copyFile(certBkPath, certPath, certFilePerm); e != nil {
 			err = errors.Join(err, e)
 		}
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	if err = h.deploy(); err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	if _, err = caClt.Revoke(cert, "superseded", &token); err != nil {
 		logger.Error("revoking certificate failed", attributes.ErrorKey, err)
@@ -181,22 +181,22 @@ func (h *Handler) Clear(_ context.Context, reason, token string) error {
 	block, err := readPemFile(certPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return models.NewNotFoundError(errors.New("certificate not found"))
+			return models_error.NewNotFoundError(errors.New("certificate not found"))
 		}
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	if err = os.Remove(certPath); err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	if err = os.Remove(path.Join(h.config.WorkDirPath, keyFile)); err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	if err = copyKeyAndCertFiles(h.config.DummyDirPath, h.config.TargetDirPath); err != nil {
-		return models.NewInternalError(err)
+		return models_error.NewInternalError(err)
 	}
 	caClt := h.caCltCert
 	if token != "" {
