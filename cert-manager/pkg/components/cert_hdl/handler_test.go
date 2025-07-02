@@ -9,9 +9,8 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"errors"
-	"fmt"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/file_util"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
-	"io"
 	"log/slog"
 	"os"
 	"path"
@@ -233,7 +232,7 @@ func TestHandler_Renew(t *testing.T) {
 	t.Run("auth with cert", func(t *testing.T) {
 		workDir := t.TempDir()
 		targetDir := t.TempDir()
-		err := copyFile(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
+		err := file_util.Copy(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -275,7 +274,7 @@ func TestHandler_Renew(t *testing.T) {
 	t.Run("auth with token", func(t *testing.T) {
 		workDir := t.TempDir()
 		targetDir := t.TempDir()
-		err := copyFile(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
+		err := file_util.Copy(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -319,7 +318,7 @@ func TestHandler_Renew(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		workDir := t.TempDir()
 		targetDir := t.TempDir()
-		err := copyFile(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
+		err := file_util.Copy(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -347,11 +346,11 @@ func TestHandler_Clear(t *testing.T) {
 	t.Run("auth with cert", func(t *testing.T) {
 		workDir := t.TempDir()
 		targetDir := t.TempDir()
-		err := copyFile(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
+		err := file_util.Copy(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
 		if err != nil {
 			t.Fatal(err)
 		}
-		err = copyFile(path.Join("./test", certFile), path.Join(workDir, certFile), certFilePerm)
+		err = file_util.Copy(path.Join("./test", certFile), path.Join(workDir, certFile), certFilePerm)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -409,11 +408,11 @@ func TestHandler_Clear(t *testing.T) {
 	t.Run("auth with token", func(t *testing.T) {
 		workDir := t.TempDir()
 		targetDir := t.TempDir()
-		err := copyFile(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
+		err := file_util.Copy(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
 		if err != nil {
 			t.Fatal(err)
 		}
-		err = copyFile(path.Join("./test", certFile), path.Join(workDir, certFile), certFilePerm)
+		err = file_util.Copy(path.Join("./test", certFile), path.Join(workDir, certFile), certFilePerm)
 		if err != nil {
 			t.Fatal(err)
 		}

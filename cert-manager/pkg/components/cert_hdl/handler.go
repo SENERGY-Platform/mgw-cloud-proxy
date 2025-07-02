@@ -15,9 +15,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/file_util"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
 	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/error"
-	"io"
 	"os"
 	"path"
 	"strings"
@@ -155,12 +155,12 @@ func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, sub
 		return models_error.NewInternalError(err)
 	}
 	certPath := path.Join(h.config.WorkDirPath, certFile)
-	certBkPath, err := createBackupFile(certPath, certFilePerm)
+	certBkPath, err := file_util.BackupFile(certPath, certFilePerm)
 	if err != nil {
 		return models_error.NewInternalError(err)
 	}
 	if err = writePemFile(certPath, certToPemBlock(cert), certFilePerm); err != nil {
-		if e := copyFile(certBkPath, certPath, certFilePerm); e != nil {
+		if e := file_util.Copy(certBkPath, certPath, certFilePerm); e != nil {
 			err = errors.Join(err, e)
 		}
 		return models_error.NewInternalError(err)
@@ -337,7 +337,7 @@ func writeKeyAndCertPemFiles(basePath string, keyBlock *pem.Block, certBlock *pe
 	}
 	defer func() {
 		if err != nil && keyBkPth != "" {
-			if e := copyFile(keyBkPth, keyPath, keyFilePerm); e != nil {
+			if e := file_util.Copy(keyBkPth, keyPath, keyFilePerm); e != nil {
 				err = errors.Join(err, e)
 			}
 		}
@@ -346,7 +346,7 @@ func writeKeyAndCertPemFiles(basePath string, keyBlock *pem.Block, certBlock *pe
 	err = writePemFile(certPath, certBlock, certFilePerm)
 	if err != nil {
 		if certBkPath != "" {
-			if e := copyFile(certBkPath, certPath, certFilePerm); e != nil {
+			if e := file_util.Copy(certBkPath, certPath, certFilePerm); e != nil {
 				err = errors.Join(err, e)
 			}
 		}
@@ -361,22 +361,22 @@ func copyKeyAndCertFiles(srcPath, targetPath string) error {
 		return err
 	}
 	keyTgtPath := path.Join(targetPath, keyFile)
-	err = copyFile(path.Join(srcPath, keyFile), keyTgtPath, keyFilePerm)
+	err = file_util.Copy(path.Join(srcPath, keyFile), keyTgtPath, keyFilePerm)
 	if err != nil {
 		return err
 	}
 	defer func() {
 		if err != nil && keyBkPth != "" {
-			if e := copyFile(keyBkPth, keyTgtPath, keyFilePerm); e != nil {
+			if e := file_util.Copy(keyBkPth, keyTgtPath, keyFilePerm); e != nil {
 				err = errors.Join(err, e)
 			}
 		}
 	}()
 	certTgtPath := path.Join(targetPath, certFile)
-	err = copyFile(path.Join(srcPath, certFile), certTgtPath, certFilePerm)
+	err = file_util.Copy(path.Join(srcPath, certFile), certTgtPath, certFilePerm)
 	if err != nil {
 		if certBkPath != "" {
-			if e := copyFile(certBkPath, certTgtPath, certFilePerm); e != nil {
+			if e := file_util.Copy(certBkPath, certTgtPath, certFilePerm); e != nil {
 				err = errors.Join(err, e)
 			}
 		}
@@ -386,11 +386,11 @@ func copyKeyAndCertFiles(srcPath, targetPath string) error {
 }
 
 func createKeyAndCertFileBackups(basePath string) (keyBackupPath string, certBackupPath string, err error) {
-	keyBackupPath, err = createBackupFile(path.Join(basePath, keyFile), keyFilePerm)
+	keyBackupPath, err = file_util.BackupFile(path.Join(basePath, keyFile), keyFilePerm)
 	if err != nil {
 		return "", "", err
 	}
-	certBackupPath, err = createBackupFile(path.Join(basePath, certFile), certFilePerm)
+	certBackupPath, err = file_util.BackupFile(path.Join(basePath, certFile), certFilePerm)
 	if err != nil {
 		return "", "", err
 	}
@@ -434,38 +434,4 @@ func writePemFile(pth string, block *pem.Block, perm os.FileMode) error {
 	}
 	defer file.Close()
 	return pem.Encode(file, block)
-}
-
-func createBackupFile(pth string, perm os.FileMode) (string, error) {
-	_, err := os.Stat(pth)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return "", nil
-		}
-		return "", err
-	}
-	bkPth := pth + ".bk"
-	if err = copyFile(pth, bkPth, perm); err != nil {
-		os.Remove(bkPth)
-		return "", err
-	}
-	return bkPth, nil
-}
-
-func copyFile(srcPath, targetPath string, perm os.FileMode) error {
-	srcFile, err := os.Open(srcPath)
-	if err != nil {
-		return err
-	}
-	defer srcFile.Close()
-	targetFile, err := os.OpenFile(targetPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, perm)
-	if err != nil {
-		return err
-	}
-	defer targetFile.Close()
-	_, err = io.Copy(targetFile, srcFile)
-	if err != nil {
-		return err
-	}
-	return nil
 }
