@@ -31,7 +31,7 @@ const (
 )
 
 const (
-	dirPerm      = 0775
+	dirPerm      = 0666
 	keyFilePerm  = 0600
 	certFilePerm = 0660
 )
