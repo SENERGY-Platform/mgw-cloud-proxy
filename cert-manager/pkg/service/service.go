@@ -17,11 +17,13 @@
 package service
 
 type Service struct {
+	certHdl certificateHandler
 	serviceInfoHandler
 }
 
-func New(srvInfoHdl serviceInfoHandler) *Service {
+func New(certHandler certificateHandler, srvInfoHdl serviceInfoHandler) *Service {
 	return &Service{
+		certHdl:            certHandler,
 		serviceInfoHandler: srvInfoHdl,
 	}
 }

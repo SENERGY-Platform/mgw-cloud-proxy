@@ -9,6 +9,7 @@ import (
 	struct_logger "github.com/SENERGY-Platform/go-service-base/struct-logger"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/api"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/cert_hdl"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/listener_util"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/os_signal_util"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/pid_file_util"
@@ -54,7 +55,10 @@ func main() {
 
 	logger.Info("starting service", slog_attr.VersionKey, srvInfoHdl.Version(), slog_attr.ConfigValuesKey, sb_config_hdl.StructToMap(cfg, true))
 
-	srv := service.New(srvInfoHdl)
+	cert_hdl.InitLogger(logger)
+	certHdl := cert_hdl.New(nil, nil, cert_hdl.Config{})
+
+	srv := service.New(certHdl, srvInfoHdl)
 
 	httpHandler, err := api.New(srv, map[string]string{
 		models_api.HeaderApiVer:  srvInfoHdl.Version(),
