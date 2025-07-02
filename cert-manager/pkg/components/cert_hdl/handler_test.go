@@ -12,6 +12,7 @@ import (
 	"fmt"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
 	"io"
+	"log/slog"
 	"os"
 	"path"
 	"reflect"
@@ -20,9 +21,10 @@ import (
 )
 
 func TestHandler_Deploy(t *testing.T) {
+	InitLogger(slog.Default())
 	workDir := t.TempDir()
 	targetDir := t.TempDir()
-	h := New(nil, nil, &loggerMock{Writer: os.Stdout}, Config{
+	h := New(nil, nil, Config{
 		WorkDirPath:   workDir,
 		TargetDirPath: targetDir,
 	})
@@ -87,6 +89,7 @@ func TestHandler_Deploy(t *testing.T) {
 }
 
 func TestHandler_New(t *testing.T) {
+	InitLogger(slog.Default())
 	t.Run("gen private key", func(t *testing.T) {
 		workDir := t.TempDir()
 		targetDir := t.TempDir()
@@ -98,7 +101,7 @@ func TestHandler_New(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, &loggerMock{Writer: os.Stdout}, Config{
+		h := New(mockClient, nil, Config{
 			WorkDirPath:         workDir,
 			TargetDirPath:       targetDir,
 			PrivateKeyAlgorithm: algoRSA,
@@ -162,7 +165,7 @@ func TestHandler_New(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, &loggerMock{Writer: os.Stdout}, Config{
+		h := New(mockClient, nil, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -214,7 +217,7 @@ func TestHandler_New(t *testing.T) {
 			T:          t,
 			Err:        errors.New("test"),
 		}
-		h := New(mockClient, nil, &loggerMock{Writer: os.Stdout}, Config{
+		h := New(mockClient, nil, Config{
 			WorkDirPath:         workDir,
 			TargetDirPath:       targetDir,
 			PrivateKeyAlgorithm: algoRSA,
@@ -241,7 +244,7 @@ func TestHandler_Renew(t *testing.T) {
 			Reason:     "superseded",
 			T:          t,
 		}
-		h := New(nil, mockClient, &loggerMock{Writer: os.Stdout}, Config{
+		h := New(nil, mockClient, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -285,7 +288,7 @@ func TestHandler_Renew(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, &loggerMock{Writer: os.Stdout}, Config{
+		h := New(mockClient, nil, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -328,7 +331,7 @@ func TestHandler_Renew(t *testing.T) {
 			T:          t,
 			Err:        errors.New("test"),
 		}
-		h := New(nil, mockClient, &loggerMock{Writer: os.Stdout}, Config{
+		h := New(nil, mockClient, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
@@ -340,6 +343,7 @@ func TestHandler_Renew(t *testing.T) {
 }
 
 func TestHandler_Clear(t *testing.T) {
+	InitLogger(slog.Default())
 	t.Run("auth with cert", func(t *testing.T) {
 		workDir := t.TempDir()
 		targetDir := t.TempDir()
@@ -358,7 +362,7 @@ func TestHandler_Clear(t *testing.T) {
 			Reason:     "unspecified",
 			T:          t,
 		}
-		h := New(nil, mockClient, &loggerMock{Writer: os.Stdout}, Config{
+		h := New(nil, mockClient, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 			DummyDirPath:  "./test",
@@ -422,7 +426,7 @@ func TestHandler_Clear(t *testing.T) {
 			Token:      "test",
 			T:          t,
 		}
-		h := New(mockClient, nil, &loggerMock{Writer: os.Stdout}, Config{
+		h := New(mockClient, nil, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 			DummyDirPath:  "./test",
@@ -477,7 +481,7 @@ func TestHandler_Clear(t *testing.T) {
 			T:          t,
 			Err:        errors.New("test"),
 		}
-		h := New(nil, mockClient, &loggerMock{Writer: os.Stdout}, Config{
+		h := New(nil, mockClient, Config{
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 			DummyDirPath:  "./test",

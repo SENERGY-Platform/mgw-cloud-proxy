@@ -46,16 +46,14 @@ const (
 type Handler struct {
 	caCltToken certificateAuthorityClient
 	caCltCert  certificateAuthorityClient
-	logger     logger
 	config     Config
 	mu         sync.RWMutex
 }
 
-func New(caClientToken, caClientCert certificateAuthorityClient, logger logger, config Config) *Handler {
+func New(caClientToken, caClientCert certificateAuthorityClient, config Config) *Handler {
 	return &Handler{
 		caCltToken: caClientToken,
 		caCltCert:  caClientCert,
-		logger:     logger,
 		config:     config,
 	}
 }
@@ -171,7 +169,7 @@ func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, sub
 		return models.NewInternalError(err)
 	}
 	if _, err = caClt.Revoke(cert, "superseded", &token); err != nil {
-		h.logger.Error("revoking certificate failed", attributes.ErrorKey, err)
+		logger.Error("revoking certificate failed", attributes.ErrorKey, err)
 	}
 	return nil
 }
@@ -205,7 +203,7 @@ func (h *Handler) Clear(_ context.Context, reason, token string) error {
 		caClt = h.caCltToken
 	}
 	if _, err = caClt.Revoke(cert, reason, &token); err != nil {
-		h.logger.Error("revoking certificate failed", attributes.ErrorKey, err)
+		logger.Error("revoking certificate failed", attributes.ErrorKey, err)
 	}
 	return nil
 }
