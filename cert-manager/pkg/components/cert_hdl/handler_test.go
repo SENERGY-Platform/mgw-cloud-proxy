@@ -10,7 +10,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
 	"io"
 	"os"
 	"path"
@@ -103,7 +103,7 @@ func TestHandler_New(t *testing.T) {
 			TargetDirPath:       targetDir,
 			PrivateKeyAlgorithm: algoRSA,
 		})
-		err := h.New(context.Background(), models.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, nil, "test")
+		err := h.New(context.Background(), models_cert.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, nil, "test")
 		if err != nil {
 			t.Error(err)
 		}
@@ -166,7 +166,7 @@ func TestHandler_New(t *testing.T) {
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
-		err = h.New(context.Background(), models.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, pb, "test")
+		err = h.New(context.Background(), models_cert.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, pb, "test")
 		if err != nil {
 			t.Error(err)
 		}
@@ -219,7 +219,7 @@ func TestHandler_New(t *testing.T) {
 			TargetDirPath:       targetDir,
 			PrivateKeyAlgorithm: algoRSA,
 		})
-		err := h.New(context.Background(), models.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, nil, "test")
+		err := h.New(context.Background(), models_cert.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, nil, "test")
 		if err == nil {
 			t.Error("expected error")
 		}
@@ -245,7 +245,7 @@ func TestHandler_Renew(t *testing.T) {
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
-		err = h.Renew(context.Background(), models.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, "")
+		err = h.Renew(context.Background(), models_cert.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, "")
 		if err != nil {
 			t.Error(err)
 		}
@@ -289,7 +289,7 @@ func TestHandler_Renew(t *testing.T) {
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
-		err = h.Renew(context.Background(), models.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, "test")
+		err = h.Renew(context.Background(), models_cert.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, "test")
 		if err != nil {
 			t.Error(err)
 		}
@@ -332,7 +332,7 @@ func TestHandler_Renew(t *testing.T) {
 			WorkDirPath:   workDir,
 			TargetDirPath: targetDir,
 		})
-		err = h.Renew(context.Background(), models.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, "")
+		err = h.Renew(context.Background(), models_cert.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, "")
 		if err == nil {
 			t.Error("expected error")
 		}

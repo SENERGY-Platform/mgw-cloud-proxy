@@ -16,6 +16,7 @@ import (
 	"fmt"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
 	"io"
 	"os"
 	"path"
@@ -67,21 +68,21 @@ func (h *Handler) Init() error {
 	return h.deploy()
 }
 
-func (h *Handler) Info(_ context.Context) (models.CertInfo, error) {
+func (h *Handler) Info(_ context.Context) (models_cert.Info, error) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	block, err := readPemFile(path.Join(h.config.WorkDirPath, certFile))
 	if err != nil {
 		if os.IsNotExist(err) {
-			return models.CertInfo{}, models.NewNotFoundError(errors.New("certificate not found"))
+			return models_cert.Info{}, models.NewNotFoundError(errors.New("certificate not found"))
 		}
-		return models.CertInfo{}, models.NewInternalError(err)
+		return models_cert.Info{}, models.NewInternalError(err)
 	}
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
-		return models.CertInfo{}, models.NewInternalError(err)
+		return models_cert.Info{}, models.NewInternalError(err)
 	}
-	return models.CertInfo{
+	return models_cert.Info{
 		Version:            cert.Version,
 		SerialNumber:       cert.SerialNumber.String(),
 		NotBefore:          cert.NotBefore,
@@ -94,7 +95,7 @@ func (h *Handler) Info(_ context.Context) (models.CertInfo, error) {
 	}, nil
 }
 
-func (h *Handler) New(_ context.Context, dn models.DistinguishedName, subAltNames []string, validityPeriod time.Duration, userPrivateKey []byte, token string) error {
+func (h *Handler) New(_ context.Context, dn models_cert.DistinguishedName, subAltNames []string, validityPeriod time.Duration, userPrivateKey []byte, token string) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	var privateKey any
@@ -136,7 +137,7 @@ func (h *Handler) New(_ context.Context, dn models.DistinguishedName, subAltName
 	return nil
 }
 
-func (h *Handler) Renew(_ context.Context, dn models.DistinguishedName, subAltNames []string, validityPeriod time.Duration, token string) error {
+func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, subAltNames []string, validityPeriod time.Duration, token string) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	keyBlock, err := readPemFile(path.Join(h.config.WorkDirPath, keyFile))
@@ -286,8 +287,8 @@ func privateKeyForCA(key any) (*rsa.PrivateKey, error) {
 	}
 }
 
-func newDN(n pkix.Name) models.DistinguishedName {
-	return models.DistinguishedName{
+func newDN(n pkix.Name) models_cert.DistinguishedName {
+	return models_cert.DistinguishedName{
 		Country:            n.Country,
 		Organization:       n.Organization,
 		OrganizationalUnit: n.OrganizationalUnit,
@@ -300,7 +301,7 @@ func newDN(n pkix.Name) models.DistinguishedName {
 	}
 }
 
-func newPkixName(dn models.DistinguishedName) pkix.Name {
+func newPkixName(dn models_cert.DistinguishedName) pkix.Name {
 	return pkix.Name{
 		Country:            dn.Country,
 		Organization:       dn.Organization,

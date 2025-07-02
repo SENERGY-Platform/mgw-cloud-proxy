@@ -19,7 +19,7 @@ package api
 import (
 	gin_mw "github.com/SENERGY-Platform/gin-middleware"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models"
+	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/api"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/slog_attr"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
@@ -43,7 +43,7 @@ func New(srv service, staticHeader map[string]string, logger logger, accessLog b
 	}
 	middleware = append(middleware,
 		gin_mw.StaticHeaderHandler(staticHeader),
-		requestid.New(requestid.WithCustomHeaderStrKey(models.HeaderRequestID)),
+		requestid.New(requestid.WithCustomHeaderStrKey(models_api.HeaderRequestID)),
 		gin_mw.ErrorHandler(GetStatusCode, ", "),
 		gin_mw.StructRecoveryHandler(logger, gin_mw.DefaultRecoveryFunc),
 	)

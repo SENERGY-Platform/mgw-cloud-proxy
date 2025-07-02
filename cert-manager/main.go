@@ -13,7 +13,7 @@ import (
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/os_signal_util"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/pid_file_util"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/config"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models"
+	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/api"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/slog_attr"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/service"
 	"net/http"
@@ -57,8 +57,8 @@ func main() {
 	srv := service.New(srvInfoHdl)
 
 	httpHandler, err := api.New(srv, map[string]string{
-		models.HeaderApiVer:  srvInfoHdl.Version(),
-		models.HeaderSrvName: srvInfoHdl.Name(),
+		models_api.HeaderApiVer:  srvInfoHdl.Version(),
+		models_api.HeaderSrvName: srvInfoHdl.Name(),
 	}, logger, cfg.HttpAccessLog)
 	if err != nil {
 		logger.Error("creating http engine failed", attributes.ErrorKey, err)
