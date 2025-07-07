@@ -10,13 +10,19 @@ import (
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/api"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/cert_hdl"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/cert_hdl/ca_clt"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/cloud_clt"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/jwt_util"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/listener_util"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/nginx_util"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/os_signal_util"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/pid_file_util"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/storage_hdl"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/config"
 	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/api"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/slog_attr"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/service"
+	"net"
 	"net/http"
 	"os"
 	"sync"
@@ -55,15 +61,61 @@ func main() {
 
 	logger.Info("starting service", slog_attr.VersionKey, srvInfoHdl.Version(), slog_attr.ConfigValuesKey, sb_config_hdl.StructToMap(cfg, true))
 
+	caClt, err := ca_clt.New(cfg.Cloud.TokenBaseUrl, cfg.Cloud.CertBaseUrl)
+	if err != nil {
+		logger.Error("creating certificate authority client failed", attributes.ErrorKey, err)
+		ec = 1
+		return
+	}
+
 	cert_hdl.InitLogger(logger)
-	certHdl := cert_hdl.New(nil, nil, cert_hdl.Config{})
+	certHdl := cert_hdl.New(caClt, cfg.CertHdl)
+	if err = certHdl.Init(); err != nil {
+		logger.Error("initializing certificate handler failed", attributes.ErrorKey, err)
+		ec = 1
+		return
+	}
 
-	srv := service.New(certHdl, srvInfoHdl)
+	storageHdl := storage_hdl.New(cfg.StoragePath)
+	if err = storageHdl.Init(); err != nil {
+		logger.Error("initializing storage handler failed", attributes.ErrorKey, err)
+		ec = 1
+		return
+	}
 
-	httpHandler, err := api.New(srv, map[string]string{
-		models_api.HeaderApiVer:  srvInfoHdl.Version(),
-		models_api.HeaderSrvName: srvInfoHdl.Name(),
-	}, logger, cfg.HttpAccessLog)
+	cloudHttpClient := &http.Client{
+		Timeout: cfg.Cloud.HttpTimeout,
+		Transport: &http.Transport{
+			DialContext: (&net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}).DialContext,
+			MaxIdleConns:          100,
+			IdleConnTimeout:       90 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+		},
+	}
+
+	service.InitLogger(logger)
+	srv := service.New(
+		certHdl,
+		storageHdl,
+		cloud_clt.New(cloudHttpClient, cfg.Cloud.CertBaseUrl, cfg.Cloud.TokenBaseUrl),
+		jwt_util.GetSubject,
+		nginx_util.Reload,
+		srvInfoHdl,
+	)
+
+	httpHandler, err := api.New(
+		srv,
+		map[string]string{
+			models_api.HeaderApiVer:  srvInfoHdl.Version(),
+			models_api.HeaderSrvName: srvInfoHdl.Name(),
+		},
+		logger,
+		cfg.HttpAccessLog,
+	)
 	if err != nil {
 		logger.Error("creating http engine failed", attributes.ErrorKey, err)
 		ec = 1
@@ -85,23 +137,7 @@ func main() {
 		cf()
 	}()
 
-	//if err = swaggerStgHdl.Init(ctx); err != nil {
-	//	util.Logger.Error("initializing swagger storage handler failed", attributes.ErrorKey, err)
-	//	ec = 1
-	//	return
-	//}
-
 	wg := &sync.WaitGroup{}
-
-	//wg.Add(1)
-	//go func() {
-	//	defer wg.Done()
-	//	if err := swaggerSrv.SwaggerPeriodicProcurement(ctx, cfg.Procurement.Interval, cfg.Procurement.InitialDelay); err != nil {
-	//		util.Logger.Error("periodic procurement failed", attributes.ErrorKey, err)
-	//		ec = 1
-	//	}
-	//	cf()
-	//}()
 
 	go func() {
 		logger.Info("starting http server")
@@ -129,83 +165,3 @@ func main() {
 
 	wg.Wait()
 }
-
-//func main() {
-//	pid := os.Getpid()
-//	fmt.Println("start", pid)
-//	err := writePidFile(pid)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	defer os.Remove("/var/run/cert_manager.pid")
-//
-//	ctx, cf := context.WithCancel(context.Background())
-//
-//	go func() {
-//		WaitForSignal(ctx, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGKILL, syscall.SIGHUP)
-//		cf()
-//	}()
-//
-//	err = WriteFile(ctx)
-//	if err != nil {
-//		fmt.Println(err)
-//	}
-//	fmt.Println("done")
-//}
-//
-//func writePidFile(pid int) error {
-//	f, err := os.Create("/var/run/cert_manager.pid")
-//	if err != nil {
-//		return err
-//	}
-//	defer f.Close()
-//	_, err = f.WriteString(strconv.FormatInt(int64(pid), 10))
-//	if err != nil {
-//		return err
-//	}
-//	return nil
-//}
-//
-//func WriteFile(ctx context.Context) error {
-//	f, err := os.Create("test")
-//	if err != nil {
-//		return err
-//	}
-//	defer f.Close()
-//	var c int64
-//	for {
-//		select {
-//		case <-ctx.Done():
-//			return ctx.Err()
-//		default:
-//			//if c == 10 {
-//			//	fmt.Println("ohhh noooooo")
-//			//	return errors.New("ohh noooo")
-//			//}
-//			_, err = f.WriteString(fmt.Sprintf("%d\n", c))
-//			if err != nil {
-//				return err
-//			}
-//			if err = f.Sync(); err != nil {
-//				return err
-//			}
-//			c++
-//			time.Sleep(time.Second)
-//		}
-//	}
-//}
-//
-//func WaitForSignal(ctx context.Context, signals ...os.Signal) {
-//	ch := make(chan os.Signal, 1)
-//	for _, sig := range signals {
-//		signal.Notify(ch, sig)
-//	}
-//	select {
-//	case sig := <-ch:
-//		fmt.Println("caught os signal", sig.String())
-//		break
-//	case <-ctx.Done():
-//		break
-//	}
-//	signal.Stop(ch)
-//}
