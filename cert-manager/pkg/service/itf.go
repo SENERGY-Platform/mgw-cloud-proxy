@@ -52,3 +52,5 @@ type serviceInfoHandler interface {
 }
 
 type subjectProvider func(token string) (string, error)
+
+type nginxReloadHandler func() error
