@@ -23,9 +23,10 @@ import (
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/slog_attr"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
+	"log/slog"
 )
 
-func New(srv service, staticHeader map[string]string, logger logger, accessLog bool) (*gin.Engine, error) {
+func New(srv service, staticHeader map[string]string, logger *slog.Logger, accessLog bool) (*gin.Engine, error) {
 	gin.SetMode(gin.ReleaseMode)
 	httpHandler := gin.New()
 	var middleware []gin.HandlerFunc

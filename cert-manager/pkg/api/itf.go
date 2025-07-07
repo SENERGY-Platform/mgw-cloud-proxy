@@ -25,10 +25,3 @@ import (
 type service interface {
 	ServiceInfo() srv_info_hdl.ServiceInfo
 }
-
-type logger interface {
-	InfoContext(ctx context.Context, msg string, args ...any)
-	ErrorContext(ctx context.Context, msg string, args ...any)
-	Debug(msg string, args ...any)
-	With(args ...any) *slog.Logger
-}
