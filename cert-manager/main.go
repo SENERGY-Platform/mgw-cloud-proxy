@@ -71,7 +71,7 @@ func main() {
 	}
 
 	httpServer := &http.Server{Handler: httpHandler}
-	serverListener, err := listener_util.NewUnix(cfg.Socket.Path, os.Getuid(), cfg.Socket.GroupID, cfg.Socket.FileMode)
+	serverListener, err := listener_util.NewUnix(cfg.Socket)
 	if err != nil {
 		logger.Error("creating server listener failed", attributes.ErrorKey, err)
 		ec = 1

@@ -1,30 +1,29 @@
 package listener_util
 
 import (
-	"io/fs"
 	"net"
 	"os"
 )
 
-func NewUnix(path string, uid int, gid int, mode fs.FileMode) (listener *net.UnixListener, err error) {
-	if err = clean(path); err != nil {
+func NewUnix(config Config) (listener *net.UnixListener, err error) {
+	if err = clean(config.Path); err != nil {
 		return
 	}
-	if listener, err = net.ListenUnix("unix", &net.UnixAddr{Name: path, Net: "unix"}); err != nil {
+	if listener, err = net.ListenUnix("unix", &net.UnixAddr{Name: config.Path, Net: "unix"}); err != nil {
 		return
 	}
 	defer func() {
 		if err != nil {
 			_ = listener.Close()
-			_ = clean(path)
+			_ = clean(config.Path)
 		}
 	}()
 	if os.Getuid() == 0 {
-		if err = os.Chown(path, uid, gid); err != nil {
+		if err = os.Chown(config.Path, config.UserID, config.GroupID); err != nil {
 			return
 		}
 	}
-	if err = os.Chmod(path, mode); err != nil {
+	if err = os.Chmod(config.Path, config.FileMode); err != nil {
 		return
 	}
 	return
