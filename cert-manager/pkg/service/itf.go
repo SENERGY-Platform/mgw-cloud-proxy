@@ -50,3 +50,5 @@ type cloudClient interface {
 type serviceInfoHandler interface {
 	ServiceInfo() srv_info_hdl.ServiceInfo
 }
+
+type subjectProvider func(token string) (string, error)
