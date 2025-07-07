@@ -36,7 +36,7 @@ func New(srv service, staticHeader map[string]string, logger *slog.Logger, acces
 			gin_mw.StructLoggerHandler(
 				logger.With(attributes.LogRecordTypeKey, attributes.HttpAccessLogRecordTypeVal),
 				attributes.Provider,
-				[]string{HealthCheckPath},
+				nil,
 				nil,
 				requestIDGenerator,
 			),
