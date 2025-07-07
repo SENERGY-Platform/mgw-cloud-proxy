@@ -27,9 +27,3 @@ func getInfoH(srv service) (string, string, gin.HandlerFunc) {
 		gc.JSON(http.StatusOK, srv.ServiceInfo())
 	}
 }
-
-func getHealthCheckH(_ service) (string, string, gin.HandlerFunc) {
-	return http.MethodGet, HealthCheckPath, func(gc *gin.Context) {
-		gc.Status(http.StatusOK)
-	}
-}

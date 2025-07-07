@@ -22,5 +22,4 @@ import (
 
 var routes = gin_mw.Routes[service]{
 	getInfoH,
-	getHealthCheckH,
 }
