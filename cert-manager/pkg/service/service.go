@@ -16,14 +16,192 @@
 
 package service
 
+import (
+	"context"
+	"errors"
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/cloud_clt"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
+	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/error"
+	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/service"
+	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/storage"
+	"net/http"
+	"sync"
+	"time"
+)
+
 type Service struct {
-	certHdl certificateHandler
+	certHdl         certificateHandler
+	storageHdl      storageHandler
+	cloudClt        cloudClient
+	subjectFunc     subjectProvider
+	nginxReloadFunc nginxReloadHandler
+	lastCertCheck   time.Time
+	lastNetCheck    time.Time
+	mu              sync.RWMutex
 	serviceInfoHandler
 }
 
-func New(certHandler certificateHandler, srvInfoHdl serviceInfoHandler) *Service {
+func New(certHandler certificateHandler, storageHdl storageHandler, cloudClt cloudClient, subjectFunc subjectProvider, nginxReloadFunc nginxReloadHandler, srvInfoHdl serviceInfoHandler) *Service {
 	return &Service{
 		certHdl:            certHandler,
+		storageHdl:         storageHdl,
+		cloudClt:           cloudClt,
+		subjectFunc:        subjectFunc,
+		nginxReloadFunc:    nginxReloadFunc,
 		serviceInfoHandler: srvInfoHdl,
 	}
+}
+
+func (s *Service) NetworkInfo(ctx context.Context) (models_service.NetworkInfo, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	data, err := s.storageHdl.ReadNetwork(ctx)
+	if err != nil {
+		return models_service.NetworkInfo{}, err
+	}
+	return models_service.NetworkInfo{
+		NetworkData: data,
+		LastChecked: s.lastNetCheck,
+	}, nil
+}
+
+func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	userID, err := s.subjectFunc(token)
+	if err != nil {
+		return models_error.NewInternalError(err)
+	}
+	if id != "" {
+		n, err := s.cloudClt.GetNetwork(ctx, id, token)
+		if err != nil {
+			var respErr *cloud_clt.ResponseError
+			if errors.As(err, &respErr) {
+				if respErr.Code != http.StatusNotFound {
+					return models_error.NewInternalError(err)
+				}
+			} else {
+				return models_error.NewInternalError(err)
+			}
+		}
+		if n.OwnerID != userID {
+			return models_error.NewForbiddenErr(errors.New("provided user ID does not match network owner ID"))
+		}
+	} else {
+		newID, err := s.cloudClt.CreateNetwork(ctx, name, token)
+		if err != nil {
+			return models_error.NewInternalError(err)
+		}
+		id = newID
+	}
+	err = s.storageHdl.WriteNetwork(ctx, models_storage.NetworkData{
+		ID:      id,
+		UserID:  userID,
+		Created: time.Now().UTC(),
+	})
+	if err != nil {
+		return models_error.NewInternalError(err)
+	}
+	return nil
+}
+
+func (s *Service) CertificateInfo(ctx context.Context) (models_service.CertInfo, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	certInfo, err := s.certHdl.Info(ctx)
+	if err != nil {
+		return models_service.CertInfo{}, err
+	}
+	data, err := s.storageHdl.ReadCertificate(ctx)
+	if err != nil {
+		logger.Error("reading certificate data failed", attributes.ErrorKey, err)
+	}
+	return models_service.CertInfo{
+		Info:        certInfo,
+		CertData:    data,
+		LastChecked: s.lastCertCheck,
+	}, nil
+}
+
+func (s *Service) NewCertificate(ctx context.Context, dn models_cert.DistinguishedName, validityPeriod time.Duration, userPrivateKey []byte, token string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	netData, err := s.storageHdl.ReadNetwork(ctx)
+	if err != nil {
+		return err
+	}
+	err = s.certHdl.New(ctx, dn, []string{netData.ID}, validityPeriod, userPrivateKey, token)
+	if err != nil {
+		return err
+	}
+	err = s.storageHdl.WriteCertificate(ctx, models_storage.CertData{
+		ValidityPeriod: validityPeriod,
+		Created:        time.Now().UTC(),
+	})
+	if err != nil {
+		return err
+	}
+	err = s.nginxReloadFunc()
+	if err != nil {
+		return models_error.NewInternalError(err)
+	}
+	return nil
+}
+
+func (s *Service) RenewCertificate(ctx context.Context, dn models_cert.DistinguishedName, validityPeriod time.Duration, token string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	netData, err := s.storageHdl.ReadNetwork(ctx)
+	if err != nil {
+		return err
+	}
+	err = s.certHdl.Renew(ctx, dn, []string{netData.ID}, validityPeriod, token)
+	if err != nil {
+		return err
+	}
+	err = s.storageHdl.WriteCertificate(ctx, models_storage.CertData{
+		ValidityPeriod: validityPeriod,
+		Created:        time.Now().UTC(),
+	})
+	if err != nil {
+		return err
+	}
+	err = s.nginxReloadFunc()
+	if err != nil {
+		return models_error.NewInternalError(err)
+	}
+	return nil
+}
+
+func (s *Service) RemoveCertificate(ctx context.Context, reason, token string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	err := s.certHdl.Clear(ctx, reason, token)
+	if err != nil {
+		return err
+	}
+	err = s.storageHdl.RemoveCertificate(ctx)
+	if err != nil {
+		return err
+	}
+	err = s.nginxReloadFunc()
+	if err != nil {
+		return models_error.NewInternalError(err)
+	}
+	return nil
+}
+
+func (s *Service) DeployCertificate(ctx context.Context) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	err := s.certHdl.Deploy(ctx)
+	if err != nil {
+		return err
+	}
+	err = s.nginxReloadFunc()
+	if err != nil {
+		return models_error.NewInternalError(err)
+	}
+	return nil
 }
