@@ -11,19 +11,28 @@ import (
 	"fmt"
 	"github.com/SENERGY-Platform/cert-certificate-authority/pkg/client"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
+	"net/url"
 	"time"
 )
 
 type Client struct {
-	tokenClt *client.RealClient
-	certClt  *client.RealClient
+	tokenClt client.Client
+	certClt  client.Client
 }
 
-func New(tokenClt, certClt *client.RealClient) *Client {
-	return &Client{
-		tokenClt: tokenClt,
-		certClt:  certClt,
+func New(tokenBaseUrl, certBaseUrl string) (*Client, error) {
+	tokenBaseUrl, err := url.JoinPath(tokenBaseUrl, "ca")
+	if err != nil {
+		return nil, err
 	}
+	certBaseUrl, err = url.JoinPath(certBaseUrl, "ca")
+	if err != nil {
+		return nil, err
+	}
+	return &Client{
+		tokenClt: client.NewClient(tokenBaseUrl),
+		certClt:  client.NewClient(certBaseUrl),
+	}, nil
 }
 
 func (c *Client) NewCertFromKey(key any, subj pkix.Name, subAltNames []string, validityPeriod time.Duration, token string) (*x509.Certificate, error) {
