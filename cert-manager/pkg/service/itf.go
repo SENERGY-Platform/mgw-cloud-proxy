@@ -19,7 +19,9 @@ package service
 import (
 	"context"
 	"github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/cloud_clt"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
+	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/storage"
 	"time"
 )
 
@@ -29,6 +31,20 @@ type certificateHandler interface {
 	Renew(ctx context.Context, dn models_cert.DistinguishedName, subAltNames []string, validityPeriod time.Duration, token string) error
 	Clear(ctx context.Context, reason, token string) error
 	Deploy(ctx context.Context) error
+}
+
+type storageHandler interface {
+	ReadCertificate(ctx context.Context) (models_storage.CertData, error)
+	ReadNetwork(ctx context.Context) (models_storage.NetworkData, error)
+	WriteCertificate(ctx context.Context, data models_storage.CertData) error
+	WriteNetwork(ctx context.Context, data models_storage.NetworkData) error
+	RemoveCertificate(ctx context.Context) error
+	RemoveNetwork(ctx context.Context) error
+}
+
+type cloudClient interface {
+	CreateNetwork(ctx context.Context, name, token string) (string, error)
+	GetNetwork(ctx context.Context, id, token string) (cloud_clt.Network, error)
 }
 
 type serviceInfoHandler interface {
