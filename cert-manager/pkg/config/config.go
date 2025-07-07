@@ -45,7 +45,7 @@ type Config struct {
 func New(path string) (*Config, error) {
 	cfg := Config{
 		PidFilePath: "/var/run/cert_manager.pid",
-		StoragePath: "/opt/cert-manager/data",
+		StoragePath: "/opt/cert-manager/data/storage",
 		Socket: listener_util.Config{
 			Path:     "/var/run/cert_manager.sock",
 			UserID:   os.Getuid(),
@@ -60,7 +60,7 @@ func New(path string) (*Config, error) {
 			AddMeta:    true,
 		},
 		CertHdl: cert_hdl.Config{
-			WorkDirPath:         "/opt/cert-manager/certs",
+			WorkDirPath:         "/opt/cert-manager/data/certs",
 			TargetDirPath:       "/opt/certs",
 			DummyDirPath:        "/opt/dummy-certs",
 			PrivateKeyAlgorithm: models_cert.AlgoRSA,
