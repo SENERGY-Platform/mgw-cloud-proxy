@@ -76,7 +76,7 @@ func (h *Handler) Info(_ context.Context) (models_cert.Info, error) {
 		PublicKeyAlgorithm: cert.PublicKeyAlgorithm.String(),
 		Issuer:             newDN(cert.Issuer),
 		Subject:            newDN(cert.Subject),
-		SubjectAltNames:    cert.DNSNames,
+		SubjectAltNames:    getSubjAltNames(cert),
 	}, nil
 }
 
@@ -384,4 +384,17 @@ func writePemFile(pth string, block *pem.Block, perm os.FileMode) error {
 	}
 	defer file.Close()
 	return pem.Encode(file, block)
+}
+
+func getSubjAltNames(cert *x509.Certificate) []string {
+	var names []string
+	names = append(names, cert.DNSNames...)
+	names = append(names, cert.EmailAddresses...)
+	for _, address := range cert.IPAddresses {
+		names = append(names, address.String())
+	}
+	for _, uri := range cert.URIs {
+		names = append(names, uri.Opaque)
+	}
+	return names
 }
