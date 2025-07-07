@@ -19,9 +19,18 @@ package api
 import (
 	"context"
 	srv_info_hdl "github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
-	"log/slog"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
+	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/service"
+	"time"
 )
 
 type service interface {
 	ServiceInfo() srv_info_hdl.ServiceInfo
+	NetworkInfo(ctx context.Context) (models_service.NetworkInfo, error)
+	NewNetwork(ctx context.Context, id, name, token string) error
+	CertificateInfo(ctx context.Context) (models_service.CertInfo, error)
+	NewCertificate(ctx context.Context, dn models_cert.DistinguishedName, validityPeriod time.Duration, userPrivateKey []byte, token string) error
+	RenewCertificate(ctx context.Context, dn models_cert.DistinguishedName, validityPeriod time.Duration, token string) error
+	RemoveCertificate(ctx context.Context, reason, token string) error
+	DeployCertificate(ctx context.Context) error
 }
