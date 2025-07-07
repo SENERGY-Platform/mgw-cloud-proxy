@@ -50,11 +50,7 @@ func New(caClient certificateAuthorityClient, config Config) *Handler {
 }
 
 func (h *Handler) Init() error {
-	err := os.MkdirAll(h.config.WorkDirPath, dirPerm)
-	if err != nil {
-		return err
-	}
-	return h.deploy()
+	return os.MkdirAll(h.config.WorkDirPath, dirPerm)
 }
 
 func (h *Handler) Info(_ context.Context) (models_cert.Info, error) {
