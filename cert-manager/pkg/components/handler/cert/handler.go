@@ -125,6 +125,14 @@ func (h *Handler) New(_ context.Context, dn models_cert.DistinguishedName, subAl
 func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, subAltNames []string, validityPeriod time.Duration, token string) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
+	certBlock, err := readPemFile(path.Join(h.config.WorkDirPath, certFile))
+	if err != nil {
+		return models_error.NewInternalError(err)
+	}
+	oldCert, err := x509.ParseCertificate(certBlock.Bytes)
+	if err != nil {
+		return models_error.NewInternalError(err)
+	}
 	keyBlock, err := readPemFile(path.Join(h.config.WorkDirPath, keyFile))
 	if err != nil {
 		return models_error.NewInternalError(err)
@@ -133,7 +141,7 @@ func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, sub
 	if err != nil {
 		return models_error.NewInternalError(err)
 	}
-	cert, err := h.caClt.NewCertFromKey(privateKey, newPkixName(dn), subAltNames, validityPeriod, token)
+	newCert, err := h.caClt.NewCertFromKey(privateKey, newPkixName(dn), subAltNames, validityPeriod, token)
 	if err != nil {
 		return models_error.NewInternalError(err)
 	}
@@ -142,7 +150,7 @@ func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, sub
 	if err != nil {
 		return models_error.NewInternalError(err)
 	}
-	if err = writePemFile(certPath, certToPemBlock(cert), certFilePerm); err != nil {
+	if err = writePemFile(certPath, certToPemBlock(newCert), certFilePerm); err != nil {
 		if e := helper_file.Copy(certBkPath, certPath, certFilePerm); e != nil {
 			err = errors.Join(err, e)
 		}
@@ -151,7 +159,7 @@ func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, sub
 	if err = h.deploy(); err != nil {
 		return models_error.NewInternalError(err)
 	}
-	if err = h.caClt.Revoke(cert, "superseded", token); err != nil {
+	if err = h.caClt.Revoke(oldCert, "superseded", token); err != nil {
 		logger.Error("revoking certificate failed", attributes.ErrorKey, err)
 	}
 	return nil
