@@ -8,7 +8,7 @@ type CertData struct {
 }
 
 type NetworkData struct {
-	ID      string    `json:"id"`
-	UserID  string    `json:"user_id"`
-	Created time.Time `json:"created"`
+	ID     string    `json:"id"`
+	UserID string    `json:"user_id"`
+	Added  time.Time `json:"added"`
 }
