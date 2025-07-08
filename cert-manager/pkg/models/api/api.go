@@ -2,6 +2,7 @@ package api
 
 import (
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
+	"time"
 )
 
 const (
@@ -25,4 +26,11 @@ type NewCertRequest struct {
 type RenewCertRequest struct {
 	models_cert.DistinguishedName
 	ValidityPeriod string `json:"validity_period"`
+}
+
+type CertInfo struct {
+	models_cert.Info
+	ValidityPeriod string    `json:"validity_period"`
+	Created        time.Time `json:"created"`
+	LastChecked    time.Time `json:"last_checked"`
 }

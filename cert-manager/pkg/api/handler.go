@@ -61,7 +61,12 @@ func getCertificateInfo(srv service) (string, string, gin.HandlerFunc) {
 			_ = gc.Error(err)
 			return
 		}
-		gc.JSON(http.StatusOK, info)
+		gc.JSON(http.StatusOK, models_api.CertInfo{
+			Info:           info.Info,
+			ValidityPeriod: info.ValidityPeriod.String(),
+			Created:        info.Created,
+			LastChecked:    info.LastChecked,
+		})
 	}
 }
 
