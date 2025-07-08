@@ -402,7 +402,7 @@ func getSubjAltNames(cert *x509.Certificate) []string {
 		names = append(names, address.String())
 	}
 	for _, uri := range cert.URIs {
-		names = append(names, uri.Opaque)
+		names = append(names, uri.String())
 	}
 	return names
 }
