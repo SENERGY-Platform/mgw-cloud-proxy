@@ -20,7 +20,7 @@ import (
 	"context"
 	"errors"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/cloud_clt"
+	client_cloud "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/clients/cloud"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
 	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/error"
 	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/service"
@@ -76,7 +76,7 @@ func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error 
 	if id != "" {
 		n, err := s.cloudClt.GetNetwork(ctx, id, token)
 		if err != nil {
-			var respErr *cloud_clt.ResponseError
+			var respErr *client_cloud.ResponseError
 			if errors.As(err, &respErr) {
 				if respErr.Code != http.StatusNotFound {
 					return models_error.NewInternalError(err)

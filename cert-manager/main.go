@@ -9,15 +9,15 @@ import (
 	struct_logger "github.com/SENERGY-Platform/go-service-base/struct-logger"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/api"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/cert_hdl"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/cert_hdl/ca_clt"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/cloud_clt"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/jwt_util"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/listener_util"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/nginx_util"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/os_signal_util"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/pid_file_util"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/storage_hdl"
+	client_ca "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/clients/ca"
+	client_cloud "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/clients/cloud"
+	handler_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/handler/cert"
+	handler_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/handler/storage"
+	helper_jwt "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/jwt"
+	helper_listener "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/listener"
+	helper_nginx "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/nginx"
+	helper_os_signal "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/os_signal"
+	helper_pid_file "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/pid_file"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/config"
 	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/api"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/slog_attr"
@@ -49,34 +49,34 @@ func main() {
 		return
 	}
 
-	err = pid_file_util.WritePidFile(cfg.PidFilePath)
+	err = helper_pid_file.Write(cfg.PidFilePath)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		ec = 1
 		return
 	}
-	defer pid_file_util.RemovePidFile(cfg.PidFilePath)
+	defer helper_pid_file.Remove(cfg.PidFilePath)
 
 	logger := struct_logger.New(cfg.Logger, os.Stderr, "", srvInfoHdl.Name())
 
 	logger.Info("starting service", slog_attr.VersionKey, srvInfoHdl.Version(), slog_attr.ConfigValuesKey, sb_config_hdl.StructToMap(cfg, true))
 
-	caClt, err := ca_clt.New(cfg.Cloud.TokenBaseUrl, cfg.Cloud.CertBaseUrl)
+	caClt, err := client_ca.New(cfg.Cloud.TokenBaseUrl, cfg.Cloud.CertBaseUrl)
 	if err != nil {
 		logger.Error("creating certificate authority client failed", attributes.ErrorKey, err)
 		ec = 1
 		return
 	}
 
-	cert_hdl.InitLogger(logger)
-	certHdl := cert_hdl.New(caClt, cfg.CertHdl)
+	handler_cert.InitLogger(logger)
+	certHdl := handler_cert.New(caClt, cfg.CertHdl)
 	if err = certHdl.Init(); err != nil {
 		logger.Error("initializing certificate handler failed", attributes.ErrorKey, err)
 		ec = 1
 		return
 	}
 
-	storageHdl := storage_hdl.New(cfg.StoragePath)
+	storageHdl := handler_storage.New(cfg.StoragePath)
 	if err = storageHdl.Init(); err != nil {
 		logger.Error("initializing storage handler failed", attributes.ErrorKey, err)
 		ec = 1
@@ -101,9 +101,9 @@ func main() {
 	srv := service.New(
 		certHdl,
 		storageHdl,
-		cloud_clt.New(cloudHttpClient, cfg.Cloud.CertBaseUrl, cfg.Cloud.TokenBaseUrl),
-		jwt_util.GetSubject,
-		nginx_util.Reload,
+		client_cloud.New(cloudHttpClient, cfg.Cloud.CertBaseUrl, cfg.Cloud.TokenBaseUrl),
+		helper_jwt.GetSubject,
+		helper_nginx.Reload,
 		srvInfoHdl,
 	)
 
@@ -123,7 +123,7 @@ func main() {
 	}
 
 	httpServer := &http.Server{Handler: httpHandler}
-	serverListener, err := listener_util.NewUnix(cfg.Socket)
+	serverListener, err := helper_listener.NewUnix(cfg.Socket)
 	if err != nil {
 		logger.Error("creating server listener failed", attributes.ErrorKey, err)
 		ec = 1
@@ -133,7 +133,7 @@ func main() {
 	ctx, cf := context.WithCancel(context.Background())
 
 	go func() {
-		os_signal_util.Wait(ctx, logger, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+		helper_os_signal.Wait(ctx, logger, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 		cf()
 	}()
 

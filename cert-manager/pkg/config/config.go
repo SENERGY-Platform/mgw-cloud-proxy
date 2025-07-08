@@ -19,8 +19,8 @@ package config
 import (
 	sb_config_hdl "github.com/SENERGY-Platform/go-service-base/config-hdl"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/cert_hdl"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/listener_util"
+	handler_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/handler/cert"
+	helper_listener "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/listener"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
 	"os"
 	"time"
@@ -33,20 +33,20 @@ type CloudConfig struct {
 }
 
 type Config struct {
-	PidFilePath   string               `json:"pid_file_path" env_var:"PID_FILE_PATH"`
-	StoragePath   string               `json:"storage_path" env_var:"STORAGE_PATH"`
-	Socket        listener_util.Config `json:"socket"`
-	Logger        struct_logger.Config `json:"logger"`
-	CertHdl       cert_hdl.Config      `json:"cert_hdl"`
-	Cloud         CloudConfig          `json:"cloud"`
-	HttpAccessLog bool                 `json:"http_access_log" env_var:"HTTP_ACCESS_LOG"`
+	PidFilePath   string                 `json:"pid_file_path" env_var:"PID_FILE_PATH"`
+	StoragePath   string                 `json:"storage_path" env_var:"STORAGE_PATH"`
+	Socket        helper_listener.Config `json:"socket"`
+	Logger        struct_logger.Config   `json:"logger"`
+	CertHdl       handler_cert.Config    `json:"cert_hdl"`
+	Cloud         CloudConfig            `json:"cloud"`
+	HttpAccessLog bool                   `json:"http_access_log" env_var:"HTTP_ACCESS_LOG"`
 }
 
 func New(path string) (*Config, error) {
 	cfg := Config{
 		PidFilePath: "/var/run/cert_manager.pid",
 		StoragePath: "/opt/cert-manager/data/storage",
-		Socket: listener_util.Config{
+		Socket: helper_listener.Config{
 			Path:     "/var/run/cert_manager.sock",
 			UserID:   os.Getuid(),
 			GroupID:  os.Getgid(),
@@ -59,7 +59,7 @@ func New(path string) (*Config, error) {
 			TimeUtc:    true,
 			AddMeta:    true,
 		},
-		CertHdl: cert_hdl.Config{
+		CertHdl: handler_cert.Config{
 			WorkDirPath:         "/opt/cert-manager/data/certs",
 			TargetDirPath:       "/opt/certs",
 			DummyDirPath:        "/opt/dummy-certs",
