@@ -14,5 +14,10 @@ type CertInfo struct {
 
 type NetworkInfo struct {
 	models_storage.NetworkData
-	LastChecked time.Time `json:"last_checked"`
+	CloudStatus CloudStatus `json:"cloud_status"`
+}
+
+type CloudStatus struct {
+	Code  int    `json:"code"`
+	Error string `json:"error"`
 }
