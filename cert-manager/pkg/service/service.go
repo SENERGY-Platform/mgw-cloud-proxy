@@ -100,9 +100,9 @@ func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error 
 		id = newID
 	}
 	err = s.storageHdl.WriteNetwork(ctx, models_storage.NetworkData{
-		ID:      id,
-		UserID:  userID,
-		Created: time.Now().UTC(),
+		ID:     id,
+		UserID: userID,
+		Added:  time.Now().UTC(),
 	})
 	if err != nil {
 		return models_error.NewInternalError(err)
