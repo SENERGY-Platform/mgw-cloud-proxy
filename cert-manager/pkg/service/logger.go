@@ -7,6 +7,6 @@ import (
 
 var logger *slog.Logger
 
-func InitLogger(logger *slog.Logger) {
-	logger = logger.With(slog_attr.ComponentKey, "service")
+func InitLogger(sl *slog.Logger) {
+	logger = sl.With(slog_attr.ComponentKey, "service")
 }
