@@ -20,10 +20,12 @@ import (
 	"context"
 	"errors"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	client_cloud "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/clients/cloud"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
 	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/error"
 	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/service"
 	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/storage"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -35,7 +37,6 @@ type Service struct {
 	subjectFunc     subjectProvider
 	nginxReloadFunc nginxReloadHandler
 	lastCertCheck   time.Time
-	lastNetCheck    time.Time
 	mu              sync.RWMutex
 	serviceInfoHandler
 }
@@ -51,16 +52,28 @@ func New(certHandler certificateHandler, storageHdl storageHandler, cloudClt clo
 	}
 }
 
-func (s *Service) NetworkInfo(ctx context.Context) (models_service.NetworkInfo, error) {
+func (s *Service) NetworkInfo(ctx context.Context, token string) (models_service.NetworkInfo, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	data, err := s.storageHdl.ReadNetwork(ctx)
 	if err != nil {
 		return models_service.NetworkInfo{}, err
 	}
+	var cs models_service.CloudStatus
+	_, err = s.cloudClt.GetNetwork(ctx, data.ID, token)
+	if err != nil {
+		logger.Error("getting network failed", attributes.ErrorKey, err)
+		cs.Error = err.Error()
+		var rErr *client_cloud.ResponseError
+		if errors.As(err, &rErr) {
+			cs.Code = rErr.Code
+		}
+	} else {
+		cs.Code = http.StatusOK
+	}
 	return models_service.NetworkInfo{
 		NetworkData: data,
-		LastChecked: s.lastNetCheck,
+		CloudStatus: cs,
 	}, nil
 }
 

@@ -28,7 +28,7 @@ import (
 
 func getNetworkInfo(srv service) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, "/network", func(gc *gin.Context) {
-		info, err := srv.NetworkInfo(gc.Request.Context())
+		info, err := srv.NetworkInfo(gc.Request.Context(), gc.GetHeader(models_api.HeaderAuth))
 		if err != nil {
 			_ = gc.Error(err)
 			return
