@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/SENERGY-Platform/cert-certificate-authority/pkg/client"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
+	"net/http"
 	"net/url"
 	"time"
 )
@@ -45,9 +46,12 @@ func (c *Client) NewCertFromKey(key any, subj pkix.Name, subAltNames []string, v
 		clt = c.tokenClt
 	}
 	// following client method does not implement a timeout
-	cert, _, err := clt.NewCertFromKey(pKey, subj, subAltNames, validityPeriod, &token)
+	cert, sc, err := clt.NewCertFromKey(pKey, subj, subAltNames, validityPeriod, &token)
 	if err != nil {
 		return nil, err
+	}
+	if sc != http.StatusOK {
+		return nil, fmt.Errorf("%d - %s", sc, http.StatusText(sc))
 	}
 	return cert, nil
 }
@@ -58,9 +62,12 @@ func (c *Client) Revoke(cert *x509.Certificate, reason string, token string) err
 		clt = c.tokenClt
 	}
 	// following client method does not implement a timeout
-	_, err := clt.Revoke(cert, reason, &token)
+	sc, err := clt.Revoke(cert, reason, &token)
 	if err != nil {
 		return err
+	}
+	if sc != http.StatusOK {
+		return fmt.Errorf("%d - %s", sc, http.StatusText(sc))
 	}
 	return nil
 }
