@@ -20,12 +20,10 @@ import (
 	"context"
 	"errors"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
-	client_cloud "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/clients/cloud"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
 	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/error"
 	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/service"
 	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/storage"
-	"net/http"
 	"sync"
 	"time"
 )
@@ -76,14 +74,7 @@ func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error 
 	if id != "" {
 		n, err := s.cloudClt.GetNetwork(ctx, id, token)
 		if err != nil {
-			var respErr *client_cloud.ResponseError
-			if errors.As(err, &respErr) {
-				if respErr.Code != http.StatusNotFound {
-					return models_error.NewInternalError(err)
-				}
-			} else {
-				return models_error.NewInternalError(err)
-			}
+			return models_error.NewInternalError(err)
 		}
 		if n.OwnerID != userID {
 			return models_error.NewForbiddenErr(errors.New("provided user ID does not match network owner ID"))
