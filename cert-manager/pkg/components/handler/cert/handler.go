@@ -394,15 +394,15 @@ func writePemFile(pth string, block *pem.Block, perm os.FileMode) error {
 	return pem.Encode(file, block)
 }
 
-func getSubjAltNames(cert *x509.Certificate) []string {
-	var names []string
-	names = append(names, cert.DNSNames...)
-	names = append(names, cert.EmailAddresses...)
+func getSubjAltNames(cert *x509.Certificate) models_cert.SANs {
+	var sans models_cert.SANs
+	sans.DNSNames = append(sans.DNSNames, cert.DNSNames...)
+	sans.EmailAddresses = append(sans.EmailAddresses, cert.EmailAddresses...)
 	for _, address := range cert.IPAddresses {
-		names = append(names, address.String())
+		sans.IPAddresses = append(sans.IPAddresses, address.String())
 	}
 	for _, uri := range cert.URIs {
-		names = append(names, uri.String())
+		sans.URIs = append(sans.URIs, uri.String())
 	}
-	return names
+	return sans
 }

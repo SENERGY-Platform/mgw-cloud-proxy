@@ -1,6 +1,8 @@
 package cert
 
-import "time"
+import (
+	"time"
+)
 
 const (
 	AlgoRSA     = "RSA"
@@ -18,7 +20,14 @@ type Info struct {
 	PublicKeyAlgorithm string            `json:"public_key_algorithm"`
 	Issuer             DistinguishedName `json:"issuer"`
 	Subject            DistinguishedName `json:"subject"`
-	SubjectAltNames    []string          `json:"subject_alt_names"`
+	SubjectAltNames    SANs              `json:"subject_alt_names"`
+}
+
+type SANs struct {
+	DNSNames       []string `json:"dns_names"`
+	EmailAddresses []string `json:"email_addresses"`
+	IPAddresses    []string `json:"ip_addresses"`
+	URIs           []string `json:"uris"`
 }
 
 type DistinguishedName struct {
