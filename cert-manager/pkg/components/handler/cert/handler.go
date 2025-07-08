@@ -83,6 +83,9 @@ func (h *Handler) Info(_ context.Context) (models_cert.Info, error) {
 func (h *Handler) New(_ context.Context, dn models_cert.DistinguishedName, subAltNames []string, validityPeriod time.Duration, userPrivateKey []byte, token string) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
+	if validityPeriod == 0 {
+		validityPeriod = h.config.DefaultValidityPeriod
+	}
 	var privateKey any
 	var err error
 	if len(userPrivateKey) > 0 {
@@ -125,6 +128,9 @@ func (h *Handler) New(_ context.Context, dn models_cert.DistinguishedName, subAl
 func (h *Handler) Renew(_ context.Context, dn models_cert.DistinguishedName, subAltNames []string, validityPeriod time.Duration, token string) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
+	if validityPeriod == 0 {
+		validityPeriod = h.config.DefaultValidityPeriod
+	}
 	certBlock, err := readPemFile(path.Join(h.config.WorkDirPath, certFile))
 	if err != nil {
 		return models_error.NewInternalError(err)
