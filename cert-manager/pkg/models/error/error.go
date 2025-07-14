@@ -22,6 +22,7 @@ var NoCertificateErr = errors.New("no certificate")
 var NoCertificateDataErr = errors.New("no certificate data")
 var NoNetworkDataErr = errors.New("no network data")
 var NetworkIDErr = errors.New("user ID does not match network owner ID")
+var CertificateExpiredErr = errors.New("certificate expired")
 
 func NewInputErr(e error) *InputErr {
 	return &InputErr{err: e}
