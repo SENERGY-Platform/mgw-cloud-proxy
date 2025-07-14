@@ -53,6 +53,17 @@ func postNewNetwork(srv service) (string, string, gin.HandlerFunc) {
 	}
 }
 
+func deleteRemoveNetwork(srv service) (string, string, gin.HandlerFunc) {
+	return http.MethodDelete, "/network", func(gc *gin.Context) {
+		err := srv.RemoveNetwork(gc.Request.Context())
+		if err != nil {
+			_ = gc.Error(err)
+			return
+		}
+		gc.Status(http.StatusOK)
+	}
+}
+
 func getCertificateInfo(srv service) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, "/certificate", func(gc *gin.Context) {
 		info, err := srv.CertificateInfo(gc.Request.Context())

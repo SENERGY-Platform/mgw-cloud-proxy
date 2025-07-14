@@ -110,6 +110,12 @@ func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error 
 	return nil
 }
 
+func (s *Service) RemoveNetwork(ctx context.Context) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.storageHdl.RemoveNetwork(ctx)
+}
+
 func (s *Service) CertificateInfo(ctx context.Context) (models_service.CertInfo, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
