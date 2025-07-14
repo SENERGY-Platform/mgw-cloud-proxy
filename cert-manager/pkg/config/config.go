@@ -39,6 +39,7 @@ type Config struct {
 	Logger        struct_logger.Config   `json:"logger"`
 	CertHdl       handler_cert.Config    `json:"cert_hdl"`
 	Cloud         CloudConfig            `json:"cloud"`
+	CheckInterval time.Duration          `json:"check_interval" env_var:"CHECK_INTERVAL"`
 	HttpAccessLog bool                   `json:"http_access_log" env_var:"HTTP_ACCESS_LOG"`
 }
 
@@ -68,6 +69,7 @@ func New(path string) (*Config, error) {
 		Cloud: CloudConfig{
 			HttpTimeout: time.Second * 30,
 		},
+		CheckInterval: time.Hour,
 	}
 	err := sb_config_hdl.Load(&cfg, nil, envTypeParser, nil, path)
 	return &cfg, err
