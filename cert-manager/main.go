@@ -150,6 +150,16 @@ func main() {
 
 	wg := &sync.WaitGroup{}
 
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := srv.PeriodicCertificateRenewal(ctx, time.Hour); err != nil {
+			logger.Error("periodic certificate renewal failed", attributes.ErrorKey, err)
+			ec = 1
+		}
+		cf()
+	}()
+
 	go func() {
 		logger.Info("starting http server")
 		if err := httpServer.Serve(serverListener); !errors.Is(err, http.ErrServerClosed) {

@@ -19,13 +19,16 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 	client_cloud "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/clients/cloud"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
 	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/error"
 	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/service"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/slog_attr"
 	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/storage"
 	"net/http"
+	"runtime/debug"
 	"sync"
 	"time"
 )
@@ -36,7 +39,7 @@ type Service struct {
 	cloudClt        cloudClient
 	subjectFunc     subjectProvider
 	nginxReloadFunc nginxReloadHandler
-	lastCertCheck   time.Time
+	renewCertTime   time.Time
 	mu              sync.RWMutex
 	serviceInfoHandler
 }
@@ -130,7 +133,7 @@ func (s *Service) CertificateInfo(ctx context.Context) (models_service.CertInfo,
 	return models_service.CertInfo{
 		Info:        certInfo,
 		CertData:    data,
-		LastChecked: s.lastCertCheck,
+		LastChecked: s.renewCertTime,
 	}, nil
 }
 
@@ -206,6 +209,81 @@ func (s *Service) DeployCertificate(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	err := s.certHdl.Deploy(ctx)
+	if err != nil {
+		return err
+	}
+	err = s.nginxReloadFunc()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Service) PeriodicCertificateRenewal(ctx context.Context, interval time.Duration) error {
+	logger.Info("starting periodic certificate renewal")
+	var lErr error
+	defer func() {
+		if r := recover(); r != nil {
+			lErr = fmt.Errorf("%s", r)
+			logger.Error("periodic certificate renewal panicked", slog_attr.StackTraceKey, string(debug.Stack()))
+		}
+		logger.Info("periodic certificate renewal halted")
+	}()
+	timer := time.NewTimer(interval)
+	loop := true
+	for loop {
+		select {
+		case <-timer.C:
+			err := s.renewCertificate(ctx)
+			if err != nil {
+				if !errors.Is(err, models_error.NoCertificateErr) {
+					logger.Error("certificate renewal failed", attributes.ErrorKey, err)
+				}
+			}
+			timer.Reset(interval)
+		case <-ctx.Done():
+			loop = false
+			logger.Info("stopping periodic certificate renewal")
+			break
+		}
+	}
+	if !timer.Stop() {
+		select {
+		case <-timer.C:
+		default:
+		}
+	}
+	return lErr
+}
+
+func (s *Service) renewCertificate(ctx context.Context) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	certInfo, err := s.certHdl.Info(ctx)
+	if err != nil {
+		return err
+	}
+	s.renewCertTime = time.Now().UTC()
+	if s.renewCertTime.After(certInfo.NotAfter) {
+		return models_error.CertificateExpiredErr
+	}
+	if certInfo.NotAfter.Sub(s.renewCertTime) > certInfo.NotAfter.Sub(certInfo.NotBefore)/2 {
+		return nil
+	}
+	certData, err := s.storageHdl.ReadCertificate(ctx)
+	if err != nil {
+		return err
+	}
+	netData, err := s.storageHdl.ReadNetwork(ctx)
+	if err != nil {
+		return err
+	}
+	err = s.certHdl.Renew(ctx, certInfo.Subject, []string{netData.ID}, certData.ValidityPeriod, "")
+	if err != nil {
+		return err
+	}
+	certData.Created = time.Now().UTC()
+	err = s.storageHdl.WriteCertificate(ctx, certData)
 	if err != nil {
 		return err
 	}
