@@ -77,13 +77,27 @@ func (h *Handler) WriteNetwork(_ context.Context, data models_storage.NetworkDat
 func (h *Handler) RemoveCertificate(_ context.Context) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	return os.Remove(path.Join(h.workDirPath, certDataFile))
+	err := os.Remove(path.Join(h.workDirPath, certDataFile))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return models_error.NoCertificateDataErr
+		}
+		return err
+	}
+	return nil
 }
 
 func (h *Handler) RemoveNetwork(_ context.Context) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	return os.Remove(path.Join(h.workDirPath, netDataFile))
+	err := os.Remove(path.Join(h.workDirPath, netDataFile))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return models_error.NoNetworkDataErr
+		}
+		return err
+	}
+	return nil
 }
 
 func read(filePath string, data any) error {
