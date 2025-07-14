@@ -82,20 +82,20 @@ func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error 
 	defer s.mu.Unlock()
 	userID, err := s.subjectFunc(token)
 	if err != nil {
-		return models_error.NewInternalError(err)
+		return err
 	}
 	if id != "" {
 		n, err := s.cloudClt.GetNetwork(ctx, id, token)
 		if err != nil {
-			return models_error.NewInternalError(err)
+			return err
 		}
 		if n.OwnerID != userID {
-			return models_error.NewForbiddenErr(errors.New("provided user ID does not match network owner ID"))
+			return models_error.NetworkIDErr
 		}
 	} else {
 		newID, err := s.cloudClt.CreateNetwork(ctx, name, token)
 		if err != nil {
-			return models_error.NewInternalError(err)
+			return err
 		}
 		id = newID
 	}
@@ -105,7 +105,7 @@ func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error 
 		Added:  time.Now().UTC(),
 	})
 	if err != nil {
-		return models_error.NewInternalError(err)
+		return err
 	}
 	return nil
 }
@@ -148,7 +148,7 @@ func (s *Service) NewCertificate(ctx context.Context, dn models_cert.Distinguish
 	}
 	err = s.nginxReloadFunc()
 	if err != nil {
-		return models_error.NewInternalError(err)
+		return err
 	}
 	return nil
 }
@@ -173,7 +173,7 @@ func (s *Service) RenewCertificate(ctx context.Context, dn models_cert.Distingui
 	}
 	err = s.nginxReloadFunc()
 	if err != nil {
-		return models_error.NewInternalError(err)
+		return err
 	}
 	return nil
 }
@@ -191,7 +191,7 @@ func (s *Service) RemoveCertificate(ctx context.Context, reason, token string) e
 	}
 	err = s.nginxReloadFunc()
 	if err != nil {
-		return models_error.NewInternalError(err)
+		return err
 	}
 	return nil
 }
@@ -205,7 +205,7 @@ func (s *Service) DeployCertificate(ctx context.Context) error {
 	}
 	err = s.nginxReloadFunc()
 	if err != nil {
-		return models_error.NewInternalError(err)
+		return err
 	}
 	return nil
 }

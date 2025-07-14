@@ -20,7 +20,6 @@ import (
 	"encoding/base64"
 	_ "github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
 	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/api"
-	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/error"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
@@ -42,7 +41,7 @@ func postNewNetwork(srv service) (string, string, gin.HandlerFunc) {
 		var req models_api.NewNetworkRequest
 		err := gc.ShouldBindJSON(&req)
 		if err != nil {
-			_ = gc.Error(models_error.NewInvalidInputError(err))
+			_ = gc.Error(newInputErr(err))
 			return
 		}
 		err = srv.NewNetwork(gc.Request.Context(), req.ID, req.Name, gc.GetHeader(models_api.HeaderAuth))
@@ -75,14 +74,14 @@ func postNewCertificate(srv service) (string, string, gin.HandlerFunc) {
 		var req models_api.NewCertRequest
 		err := gc.ShouldBindJSON(&req)
 		if err != nil {
-			_ = gc.Error(models_error.NewInvalidInputError(err))
+			_ = gc.Error(newInputErr(err))
 			return
 		}
 		var keyBytes []byte
 		if req.PrivateKey != "" {
 			keyBytes, err = base64.StdEncoding.DecodeString(req.PrivateKey)
 			if err != nil {
-				_ = gc.Error(models_error.NewInvalidInputError(err))
+				_ = gc.Error(newInputErr(err))
 				return
 			}
 		}
@@ -90,7 +89,7 @@ func postNewCertificate(srv service) (string, string, gin.HandlerFunc) {
 		if req.ValidityPeriod != "" {
 			validityPeriod, err = time.ParseDuration(req.ValidityPeriod)
 			if err != nil {
-				_ = gc.Error(models_error.NewInvalidInputError(err))
+				_ = gc.Error(newInputErr(err))
 				return
 			}
 		}
@@ -108,14 +107,14 @@ func patchRenewCertificate(srv service) (string, string, gin.HandlerFunc) {
 		var req models_api.RenewCertRequest
 		err := gc.ShouldBindJSON(&req)
 		if err != nil {
-			_ = gc.Error(models_error.NewInvalidInputError(err))
+			_ = gc.Error(newInputErr(err))
 			return
 		}
 		var validityPeriod time.Duration
 		if req.ValidityPeriod != "" {
 			validityPeriod, err = time.ParseDuration(req.ValidityPeriod)
 			if err != nil {
-				_ = gc.Error(models_error.NewInvalidInputError(err))
+				_ = gc.Error(newInputErr(err))
 				return
 			}
 		}

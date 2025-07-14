@@ -16,54 +16,9 @@
 
 package error
 
-type cError struct {
-	err error
-}
+import "errors"
 
-type InternalError struct {
-	cError
-}
-
-type NotFoundError struct {
-	cError
-}
-
-type InvalidInputError struct {
-	cError
-}
-
-type ForbiddenError struct {
-	cError
-}
-
-type ResourceBusyError struct {
-	cError
-}
-
-func (e *cError) Error() string {
-	return e.err.Error()
-}
-
-func (e *cError) Unwrap() error {
-	return e.err
-}
-
-func NewInternalError(err error) error {
-	return &InternalError{cError{err: err}}
-}
-
-func NewNotFoundError(err error) error {
-	return &NotFoundError{cError{err: err}}
-}
-
-func NewInvalidInputError(err error) error {
-	return &InvalidInputError{cError{err: err}}
-}
-
-func NewForbiddenErr(err error) error {
-	return &ForbiddenError{cError{err: err}}
-}
-
-func NewResourceBusyError(err error) error {
-	return &ResourceBusyError{cError{err: err}}
-}
+var NoCertificateErr = errors.New("no certificate")
+var NoCertificateDataErr = errors.New("no certificate data")
+var NoNetworkDataErr = errors.New("no network data")
+var NetworkIDErr = errors.New("user ID does not match network owner ID")

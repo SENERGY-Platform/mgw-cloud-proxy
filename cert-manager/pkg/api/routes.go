@@ -23,6 +23,7 @@ import (
 var routes = gin_mw.Routes[service]{
 	getNetworkInfo,
 	postNewNetwork,
+	deleteRemoveNetwork,
 	getCertificateInfo,
 	postNewCertificate,
 	patchRenewCertificate,

@@ -45,7 +45,7 @@ func New(srv service, staticHeader map[string]string, logger *slog.Logger, acces
 	middleware = append(middleware,
 		gin_mw.StaticHeaderHandler(staticHeader),
 		requestid.New(requestid.WithCustomHeaderStrKey(models_api.HeaderRequestID)),
-		gin_mw.ErrorHandler(GetStatusCode, ", "),
+		gin_mw.ErrorHandler(getStatusCode, ", "),
 		gin_mw.StructRecoveryHandler(logger, gin_mw.DefaultRecoveryFunc),
 	)
 	httpHandler.Use(middleware...)

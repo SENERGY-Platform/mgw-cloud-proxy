@@ -22,26 +22,40 @@ import (
 	"net/http"
 )
 
-func GetStatusCode(err error) int {
-	var nfe *models_error.NotFoundError
-	if errors.As(err, &nfe) {
-		return http.StatusNotFound
-	}
-	var iie *models_error.InvalidInputError
-	if errors.As(err, &iie) {
-		return http.StatusBadRequest
-	}
-	var ie *models_error.InternalError
-	if errors.As(err, &ie) {
-		return http.StatusInternalServerError
-	}
-	var fe *models_error.ForbiddenError
-	if errors.As(err, &fe) {
-		return http.StatusForbidden
-	}
-	var rbe *models_error.ResourceBusyError
-	if errors.As(err, &rbe) {
-		return http.StatusConflict
+var errMap = map[error]int{
+	models_error.NoCertificateErr:     http.StatusNotFound,
+	models_error.NoCertificateDataErr: http.StatusNotFound,
+	models_error.NoNetworkDataErr:     http.StatusNotFound,
+	models_error.NetworkIDErr:         http.StatusForbidden,
+	&inputErr{}:                       http.StatusBadRequest,
+}
+
+func getStatusCode(err error) int {
+	for e, c := range errMap {
+		if errors.Is(err, e) {
+			return c
+		}
 	}
 	return 0
+}
+
+func newInputErr(e error) *inputErr {
+	return &inputErr{err: e}
+}
+
+type inputErr struct {
+	err error
+}
+
+func (e *inputErr) Error() string {
+	return e.err.Error()
+}
+
+func (e *inputErr) Unwrap() error {
+	return e.err
+}
+
+func (e *inputErr) Is(err error) bool {
+	_, ok := err.(*inputErr)
+	return ok
 }

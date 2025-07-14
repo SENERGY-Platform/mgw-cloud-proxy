@@ -36,9 +36,9 @@ func (h *Handler) ReadCertificate(_ context.Context) (models_storage.CertData, e
 	var data models_storage.CertData
 	if err := read(path.Join(h.workDirPath, certDataFile), &data); err != nil {
 		if os.IsNotExist(err) {
-			return models_storage.CertData{}, models_error.NewNotFoundError(errors.New("no certificate data"))
+			return models_storage.CertData{}, models_error.NoCertificateDataErr
 		}
-		return models_storage.CertData{}, models_error.NewInternalError(err)
+		return models_storage.CertData{}, err
 	}
 	return data, nil
 }
@@ -49,9 +49,9 @@ func (h *Handler) ReadNetwork(_ context.Context) (models_storage.NetworkData, er
 	var data models_storage.NetworkData
 	if err := read(path.Join(h.workDirPath, netDataFile), &data); err != nil {
 		if os.IsNotExist(err) {
-			return models_storage.NetworkData{}, models_error.NewNotFoundError(errors.New("no network data"))
+			return models_storage.NetworkData{}, models_error.NoNetworkDataErr
 		}
-		return models_storage.NetworkData{}, models_error.NewInternalError(err)
+		return models_storage.NetworkData{}, err
 	}
 	return data, nil
 }
@@ -60,7 +60,7 @@ func (h *Handler) WriteCertificate(_ context.Context, data models_storage.CertDa
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	if err := write(path.Join(h.workDirPath, certDataFile), data); err != nil {
-		return models_error.NewInternalError(err)
+		return err
 	}
 	return nil
 }
@@ -69,7 +69,7 @@ func (h *Handler) WriteNetwork(_ context.Context, data models_storage.NetworkDat
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	if err := write(path.Join(h.workDirPath, netDataFile), data); err != nil {
-		return models_error.NewInternalError(err)
+		return err
 	}
 	return nil
 }
