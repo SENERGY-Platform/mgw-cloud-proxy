@@ -49,6 +49,17 @@ func main() {
 		return
 	}
 
+	if config.Deploy {
+		certHdl := handler_cert.New(nil, cfg.CertHdl)
+		err = certHdl.Deploy(context.Background())
+		if err != nil {
+			fmt.Println(err)
+			ec = 1
+			return
+		}
+		return
+	}
+
 	err = helper_pid_file.Write(cfg.PidFilePath)
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)

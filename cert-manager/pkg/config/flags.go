@@ -21,9 +21,11 @@ import (
 )
 
 var ConfPath string
+var Deploy bool
 
 func ParseFlags() {
 	flag.StringVar(&ConfPath, "config", "", "path to config JSON file")
+	flag.BoolVar(&Deploy, "deploy", false, "deploy certificates and exit")
 	flag.Parse()
 	return
 }
