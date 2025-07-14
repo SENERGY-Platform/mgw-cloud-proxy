@@ -44,6 +44,8 @@ if [ "$1" = "nginx" ] || [ "$1" = "nginx-debug" ]; then
     fi
 fi
 
+./opt/cert-manager/bin -deploy
+
 set +e
 
 ec=1
