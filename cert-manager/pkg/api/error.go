@@ -23,11 +23,11 @@ import (
 )
 
 var errMap = map[error]int{
+	models_error.NewInputErr(nil):     http.StatusBadRequest,
+	models_error.NetworkIDErr:         http.StatusForbidden,
 	models_error.NoCertificateErr:     http.StatusNotFound,
 	models_error.NoCertificateDataErr: http.StatusNotFound,
 	models_error.NoNetworkDataErr:     http.StatusNotFound,
-	models_error.NetworkIDErr:         http.StatusForbidden,
-	&inputErr{}:                       http.StatusBadRequest,
 }
 
 func getStatusCode(err error) int {
@@ -37,25 +37,4 @@ func getStatusCode(err error) int {
 		}
 	}
 	return 0
-}
-
-func newInputErr(e error) *inputErr {
-	return &inputErr{err: e}
-}
-
-type inputErr struct {
-	err error
-}
-
-func (e *inputErr) Error() string {
-	return e.err.Error()
-}
-
-func (e *inputErr) Unwrap() error {
-	return e.err
-}
-
-func (e *inputErr) Is(err error) bool {
-	_, ok := err.(*inputErr)
-	return ok
 }

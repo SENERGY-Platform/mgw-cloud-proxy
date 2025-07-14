@@ -22,3 +22,24 @@ var NoCertificateErr = errors.New("no certificate")
 var NoCertificateDataErr = errors.New("no certificate data")
 var NoNetworkDataErr = errors.New("no network data")
 var NetworkIDErr = errors.New("user ID does not match network owner ID")
+
+func NewInputErr(e error) *InputErr {
+	return &InputErr{err: e}
+}
+
+type InputErr struct {
+	err error
+}
+
+func (e *InputErr) Error() string {
+	return e.err.Error()
+}
+
+func (e *InputErr) Unwrap() error {
+	return e.err
+}
+
+func (e *InputErr) Is(err error) bool {
+	_, ok := err.(*InputErr)
+	return ok
+}
