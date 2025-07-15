@@ -22,6 +22,7 @@ import (
 	handler_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/handler/cert"
 	helper_listener "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/listener"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/service"
 	"os"
 	"time"
 )
@@ -32,6 +33,11 @@ type CloudConfig struct {
 	HttpTimeout  time.Duration `json:"http_timeout" env_var:"CLOUD_HTTP_TIMEOUT"`
 }
 
+type DepAdvConfig struct {
+	ModuleManagerBaseUrl string        `json:"module_manager_base_url" env_var:"MODULE_MANAGER_BASE_URL"`
+	HttpTimeout          time.Duration `json:"http_timeout" env_var:"DEP_ADV_HTTP_TIMEOUT"`
+}
+
 type Config struct {
 	PidFilePath   string                 `json:"pid_file_path" env_var:"PID_FILE_PATH"`
 	StoragePath   string                 `json:"storage_path" env_var:"STORAGE_PATH"`
@@ -39,6 +45,8 @@ type Config struct {
 	Logger        struct_logger.Config   `json:"logger"`
 	CertHdl       handler_cert.Config    `json:"cert_hdl"`
 	Cloud         CloudConfig            `json:"cloud"`
+	Service       service.Config         `json:"service"`
+	DepAdv        DepAdvConfig           `json:"dep_adv"`
 	CheckInterval time.Duration          `json:"check_interval" env_var:"CHECK_INTERVAL"`
 	HttpAccessLog bool                   `json:"http_access_log" env_var:"HTTP_ACCESS_LOG"`
 }
@@ -67,7 +75,13 @@ func New(path string) (*Config, error) {
 			PrivateKeyAlgorithm: models_cert.AlgoRSA,
 		},
 		Cloud: CloudConfig{
+			HttpTimeout: time.Minute,
+		},
+		DepAdv: DepAdvConfig{
 			HttpTimeout: time.Second * 30,
+		},
+		Service: service.Config{
+			DefaultCertValidityPeriod: time.Hour * 2160,
 		},
 		CheckInterval: time.Hour,
 	}
