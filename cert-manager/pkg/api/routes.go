@@ -24,6 +24,7 @@ var routes = gin_mw.Routes[service]{
 	getNetworkInfo,
 	postNewNetwork,
 	deleteRemoveNetwork,
+	patchAdvertiseNetwork,
 	getCertificateInfo,
 	postNewCertificate,
 	patchRenewCertificate,
