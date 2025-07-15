@@ -13,6 +13,7 @@ RUN mkdir -p /opt/certs
 RUN mkdir -p /opt/dummy-certs
 RUN mkdir -p /opt/cert-manager
 COPY --from=builder /go/src/app/bin /opt/cert-manager/bin
+COPY --from=builder /go/src/app/docs /opt/cert-manager/docs
 COPY include/certs /opt/certs
 COPY include/certs /opt/dummy-certs
 COPY include/config/nginx.conf /etc/nginx/nginx.conf
