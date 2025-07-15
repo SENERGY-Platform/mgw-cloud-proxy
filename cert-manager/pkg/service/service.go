@@ -36,22 +36,26 @@ import (
 type Service struct {
 	certHdl         certificateHandler
 	storageHdl      storageHandler
+	depAdvClt       deploymentAdvertisementsClient
 	cloudClt        cloudClient
 	subjectFunc     subjectProvider
 	nginxReloadFunc nginxReloadHandler
+	config          Config
 	renewCertTime   time.Time
 	mu              sync.RWMutex
 	serviceInfoHandler
 }
 
-func New(certHandler certificateHandler, storageHdl storageHandler, cloudClt cloudClient, subjectFunc subjectProvider, nginxReloadFunc nginxReloadHandler, srvInfoHdl serviceInfoHandler) *Service {
+func New(certHandler certificateHandler, storageHdl storageHandler, depAdvClt deploymentAdvertisementsClient, cloudClt cloudClient, subjectFunc subjectProvider, nginxReloadFunc nginxReloadHandler, srvInfoHdl serviceInfoHandler, config Config) *Service {
 	return &Service{
 		certHdl:            certHandler,
 		storageHdl:         storageHdl,
+		depAdvClt:          depAdvClt,
 		cloudClt:           cloudClt,
 		subjectFunc:        subjectFunc,
 		nginxReloadFunc:    nginxReloadFunc,
 		serviceInfoHandler: srvInfoHdl,
+		config:             config,
 	}
 }
 

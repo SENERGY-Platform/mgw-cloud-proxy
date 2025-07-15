@@ -13,6 +13,7 @@ import (
 	client_cloud "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/clients/cloud"
 	handler_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/handler/cert"
 	handler_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/handler/storage"
+	helper_http "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/http"
 	helper_jwt "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/jwt"
 	helper_listener "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/listener"
 	helper_nginx "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/nginx"
@@ -22,7 +23,7 @@ import (
 	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/api"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/slog_attr"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/service"
-	"net"
+	dep_adv_client "github.com/SENERGY-Platform/mgw-module-manager/clients/dep-adv-client"
 	"net/http"
 	"os"
 	"sync"
@@ -94,28 +95,16 @@ func main() {
 		return
 	}
 
-	cloudHttpClient := &http.Client{
-		Timeout: cfg.Cloud.HttpTimeout,
-		Transport: &http.Transport{
-			DialContext: (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).DialContext,
-			MaxIdleConns:          100,
-			IdleConnTimeout:       90 * time.Second,
-			TLSHandshakeTimeout:   10 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
-		},
-	}
-
 	service.InitLogger(logger)
 	srv := service.New(
 		certHdl,
 		storageHdl,
-		client_cloud.New(cloudHttpClient, cfg.Cloud.CertBaseUrl, cfg.Cloud.TokenBaseUrl),
+		dep_adv_client.New(helper_http.NewClient(cfg.DepAdv.HttpTimeout), cfg.DepAdv.ModuleManagerBaseUrl),
+		client_cloud.New(helper_http.NewClient(cfg.Cloud.HttpTimeout), cfg.Cloud.CertBaseUrl, cfg.Cloud.TokenBaseUrl),
 		helper_jwt.GetSubject,
 		helper_nginx.Reload,
 		srvInfoHdl,
+		cfg.Service,
 	)
 
 	httpHandler, err := api.New(
