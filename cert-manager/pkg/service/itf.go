@@ -22,6 +22,7 @@ import (
 	client_cloud "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/clients/cloud"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
 	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/storage"
+	mm_model "github.com/SENERGY-Platform/mgw-module-manager/lib/model"
 	"time"
 )
 
@@ -49,6 +50,11 @@ type cloudClient interface {
 
 type serviceInfoHandler interface {
 	ServiceInfo() srv_info_hdl.ServiceInfo
+}
+
+type deploymentAdvertisementsClient interface {
+	PutDepAdvertisement(ctx context.Context, dID string, adv mm_model.DepAdvertisementBase) error
+	DeleteDepAdvertisement(ctx context.Context, dID, ref string) error
 }
 
 type subjectProvider func(token string) (string, error)
