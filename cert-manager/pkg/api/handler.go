@@ -277,11 +277,11 @@ func getInfoH(srv Service) (string, string, gin.HandlerFunc) {
 
 func getSwagger(_ Service) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, "/swagger", func(gc *gin.Context) {
-		if _, err := os.Stat("docs/swagger.json"); err != nil {
+		if _, err := os.Stat("/opt/cert-manager/docs/swagger.json"); err != nil {
 			_ = gc.Error(err)
 			return
 		}
 		gc.Header("Content-Type", gin.MIMEJSON)
-		gc.File("docs/swagger.json")
+		gc.File("/opt/cert-manager/docs/swagger.json")
 	}
 }
