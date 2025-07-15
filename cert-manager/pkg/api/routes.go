@@ -31,4 +31,5 @@ var routes = gin_mw.Routes[Service]{
 	deleteRemoveCertificate,
 	patchDeployCertificate,
 	getInfoH,
+	getSwagger,
 }

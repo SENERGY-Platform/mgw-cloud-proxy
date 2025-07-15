@@ -1,0 +1,691 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Provides network and certificate management functions.",
+        "title": "Cert-Manager",
+        "contact": {},
+        "license": {
+            "name": "Apache-2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "0.0.1"
+    },
+    "basePath": "/",
+    "paths": {
+        "/certificate": {
+            "get": {
+                "description": "Get summarized information of the stored certificate.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Certificate"
+                ],
+                "summary": "Info",
+                "responses": {
+                    "200": {
+                        "description": "certificate info",
+                        "schema": {
+                            "$ref": "#/definitions/service.CertInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new certificate and deploy to nginx. Optional private key must be in PEM format and base64 encoded.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Certificate"
+                ],
+                "summary": "New",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "jwt token",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "description": "cert data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.NewCertRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove and revoke the stored certificate.",
+                "tags": [
+                    "Certificate"
+                ],
+                "summary": "Remove",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "jwt token",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "string",
+                        "description": "revokation reason",
+                        "name": "reason",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Renew the stored certificate and deploy to nginx.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Certificate"
+                ],
+                "summary": "Renew",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "jwt token",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "description": "cert data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.RenewCertRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/certificate/deploy": {
+            "patch": {
+                "description": "Deploy stored certificate to nginx.",
+                "tags": [
+                    "Certificate"
+                ],
+                "summary": "Deploy",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/info": {
+            "get": {
+                "description": "Get service information like version, uptime and memory usage.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Info"
+                ],
+                "summary": "Info",
+                "responses": {
+                    "200": {
+                        "description": "service info",
+                        "schema": {
+                            "$ref": "#/definitions/srv_info_hdl.ServiceInfo"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/network": {
+            "get": {
+                "description": "Get info like ID, user ID and cloud status of the stored network.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Network"
+                ],
+                "summary": "Info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "jwt token",
+                        "name": "Authorization",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.NetworkInfo"
+                        }
+                    },
+                    "404": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Add an existing network or create a new network.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Network"
+                ],
+                "summary": "New",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "jwt token",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "description": "network data",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.NewNetworkRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove the stored network.",
+                "tags": [
+                    "Network"
+                ],
+                "summary": "Remove",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/network/advertise": {
+            "patch": {
+                "description": "Advertise the stored network.",
+                "tags": [
+                    "Network"
+                ],
+                "summary": "Advertise",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "404": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "error message",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "api.NewCertRequest": {
+            "type": "object",
+            "properties": {
+                "common_name": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "locality": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "organization": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "organizational_unit": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "postal_code": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "private_key": {
+                    "type": "string"
+                },
+                "province": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "serial_number": {
+                    "type": "string"
+                },
+                "street_address": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "validity_period": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.NewNetworkRequest": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.RenewCertRequest": {
+            "type": "object",
+            "properties": {
+                "common_name": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "locality": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "organization": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "organizational_unit": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "postal_code": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "province": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "serial_number": {
+                    "type": "string"
+                },
+                "street_address": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "validity_period": {
+                    "type": "string"
+                }
+            }
+        },
+        "cert.DistinguishedName": {
+            "type": "object",
+            "properties": {
+                "common_name": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "locality": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "organization": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "organizational_unit": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "postal_code": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "province": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "serial_number": {
+                    "type": "string"
+                },
+                "street_address": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "cert.SANs": {
+            "type": "object",
+            "properties": {
+                "dns_names": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "email_addresses": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "ip_addresses": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "uris": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "service.CertInfo": {
+            "type": "object",
+            "properties": {
+                "created": {
+                    "type": "string"
+                },
+                "issuer": {
+                    "$ref": "#/definitions/cert.DistinguishedName"
+                },
+                "last_checked": {
+                    "type": "string"
+                },
+                "not_after": {
+                    "type": "string"
+                },
+                "not_before": {
+                    "type": "string"
+                },
+                "public_key_algorithm": {
+                    "type": "string"
+                },
+                "serial_number": {
+                    "type": "string"
+                },
+                "signature_algorithm": {
+                    "type": "string"
+                },
+                "subject": {
+                    "$ref": "#/definitions/cert.DistinguishedName"
+                },
+                "subject_alt_names": {
+                    "$ref": "#/definitions/cert.SANs"
+                },
+                "validity_period": {
+                    "$ref": "#/definitions/time.Duration"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "service.CloudStatus": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.NetworkInfo": {
+            "type": "object",
+            "properties": {
+                "added": {
+                    "type": "string"
+                },
+                "cloud_status": {
+                    "$ref": "#/definitions/service.CloudStatus"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "srv_info_hdl.ServiceInfo": {
+            "type": "object",
+            "properties": {
+                "mem_alloc": {
+                    "type": "string"
+                },
+                "mem_alloc_b": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "up_time": {
+                    "type": "string"
+                },
+                "up_time_ns": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "time.Duration": {
+            "type": "integer",
+            "enum": [
+                -9223372036854775808,
+                9223372036854775807,
+                1,
+                1000,
+                1000000,
+                1000000000,
+                60000000000,
+                3600000000000
+            ],
+            "x-enum-varnames": [
+                "minDuration",
+                "maxDuration",
+                "Nanosecond",
+                "Microsecond",
+                "Millisecond",
+                "Second",
+                "Minute",
+                "Hour"
+            ]
+        }
+    }
+}
