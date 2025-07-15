@@ -100,6 +100,9 @@ func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error 
 			return models_error.NetworkIDErr
 		}
 	} else {
+		if name == "" {
+			name = s.config.DefaultNetworkName
+		}
 		newID, err := s.cloudClt.CreateNetwork(ctx, name, token)
 		if err != nil {
 			return err
@@ -148,6 +151,9 @@ func (s *Service) NewCertificate(ctx context.Context, dn models_cert.Distinguish
 	if err != nil {
 		return err
 	}
+	if validityPeriod == 0 {
+		validityPeriod = s.config.DefaultCertValidityPeriod
+	}
 	err = s.certHdl.New(ctx, dn, []string{netData.ID}, validityPeriod, userPrivateKey, token)
 	if err != nil {
 		return err
@@ -172,6 +178,9 @@ func (s *Service) RenewCertificate(ctx context.Context, dn models_cert.Distingui
 	netData, err := s.storageHdl.ReadNetwork(ctx)
 	if err != nil {
 		return err
+	}
+	if validityPeriod == 0 {
+		validityPeriod = s.config.DefaultCertValidityPeriod
 	}
 	err = s.certHdl.Renew(ctx, dn, []string{netData.ID}, validityPeriod, token)
 	if err != nil {
