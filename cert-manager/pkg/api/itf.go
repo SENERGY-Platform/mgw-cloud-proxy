@@ -24,7 +24,7 @@ import (
 	"time"
 )
 
-type service interface {
+type Service interface {
 	ServiceInfo() srv_info_hdl.ServiceInfo
 	NetworkInfo(ctx context.Context, token string) (models_service.NetworkInfo, error)
 	NewNetwork(ctx context.Context, id, name, token string) error

@@ -26,7 +26,14 @@ import (
 	"log/slog"
 )
 
-func New(srv service, staticHeader map[string]string, logger *slog.Logger, accessLog bool) (*gin.Engine, error) {
+// New godoc
+// @title Cert-Manager
+// @version 0.0.1
+// @description Provides network and certificate management functions.
+// @license.name Apache-2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @BasePath /
+func New(srv Service, staticHeader map[string]string, logger *slog.Logger, accessLog bool) (*gin.Engine, error) {
 	gin.SetMode(gin.ReleaseMode)
 	httpHandler := gin.New()
 	var middleware []gin.HandlerFunc
