@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	srv_info_hdl "github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 	client_cloud "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/clients/cloud"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
@@ -46,19 +47,19 @@ type Service struct {
 	config          Config
 	renewCertTime   time.Time
 	mu              sync.RWMutex
-	serviceInfoHandler
+	srvInfoHdl      serviceInfoHandler
 }
 
 func New(certHandler certificateHandler, storageHdl storageHandler, depAdvClt deploymentAdvertisementsClient, cloudClt cloudClient, subjectFunc subjectProvider, nginxReloadFunc nginxReloadHandler, srvInfoHdl serviceInfoHandler, config Config) *Service {
 	return &Service{
-		certHdl:            certHandler,
-		storageHdl:         storageHdl,
-		depAdvClt:          depAdvClt,
-		cloudClt:           cloudClt,
-		subjectFunc:        subjectFunc,
-		nginxReloadFunc:    nginxReloadFunc,
-		serviceInfoHandler: srvInfoHdl,
-		config:             config,
+		certHdl:         certHandler,
+		storageHdl:      storageHdl,
+		depAdvClt:       depAdvClt,
+		cloudClt:        cloudClt,
+		subjectFunc:     subjectFunc,
+		nginxReloadFunc: nginxReloadFunc,
+		srvInfoHdl:      srvInfoHdl,
+		config:          config,
 	}
 }
 
@@ -259,6 +260,10 @@ func (s *Service) DeployCertificate(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+func (s *Service) ServiceInfo(_ context.Context) (srv_info_hdl.ServiceInfo, error) {
+	return s.srvInfoHdl.ServiceInfo(), nil
 }
 
 func (s *Service) PeriodicCertificateRenewal(ctx context.Context, interval time.Duration) error {

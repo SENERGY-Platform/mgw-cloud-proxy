@@ -271,7 +271,12 @@ func patchDeployCertificate(srv Service) (string, string, gin.HandlerFunc) {
 // @Router /info [get]
 func getInfoH(srv Service) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, "/info", func(gc *gin.Context) {
-		gc.JSON(http.StatusOK, srv.ServiceInfo())
+		info, err := srv.ServiceInfo(gc.Request.Context())
+		if err != nil {
+			_ = gc.Error(err)
+			return
+		}
+		gc.JSON(http.StatusOK, info)
 	}
 }
 

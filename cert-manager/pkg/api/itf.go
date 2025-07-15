@@ -25,7 +25,6 @@ import (
 )
 
 type Service interface {
-	ServiceInfo() srv_info_hdl.ServiceInfo
 	NetworkInfo(ctx context.Context, token string) (models_service.NetworkInfo, error)
 	NewNetwork(ctx context.Context, id, name, token string) error
 	RemoveNetwork(ctx context.Context) error
@@ -35,4 +34,5 @@ type Service interface {
 	RenewCertificate(ctx context.Context, dn models_cert.DistinguishedName, validityPeriod time.Duration, token string) error
 	RemoveCertificate(ctx context.Context, reason, token string) error
 	DeployCertificate(ctx context.Context) error
+	ServiceInfo(ctx context.Context) (srv_info_hdl.ServiceInfo, error)
 }
