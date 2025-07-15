@@ -27,11 +27,14 @@ import (
 	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/service"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/slog_attr"
 	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/storage"
+	mm_model "github.com/SENERGY-Platform/mgw-module-manager/lib/model"
 	"net/http"
 	"runtime/debug"
 	"sync"
 	"time"
 )
+
+const depAdvRef = "network"
 
 type Service struct {
 	certHdl         certificateHandler
@@ -117,13 +120,39 @@ func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error 
 	if err != nil {
 		return err
 	}
+	err = s.depAdvClt.PutDepAdvertisement(ctx, s.config.DeploymentID, newDepAdvBase(id))
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (s *Service) RemoveNetwork(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return s.storageHdl.RemoveNetwork(ctx)
+	err := s.storageHdl.RemoveNetwork(ctx)
+	if err != nil {
+		return err
+	}
+	err = s.depAdvClt.DeleteDepAdvertisement(ctx, s.config.DeploymentID, depAdvRef)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *Service) AdvertiseNetwork(ctx context.Context) error {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	data, err := s.storageHdl.ReadNetwork(ctx)
+	if err != nil {
+		return err
+	}
+	err = s.depAdvClt.PutDepAdvertisement(ctx, s.config.DeploymentID, newDepAdvBase(data.ID))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *Service) CertificateInfo(ctx context.Context) (models_service.CertInfo, error) {
@@ -305,4 +334,13 @@ func (s *Service) renewCertificate(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+func newDepAdvBase(id string) mm_model.DepAdvertisementBase {
+	return mm_model.DepAdvertisementBase{
+		Ref: depAdvRef,
+		Items: map[string]string{
+			"id": id,
+		},
+	}
 }
