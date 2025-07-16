@@ -31,11 +31,13 @@ import (
 	mm_model "github.com/SENERGY-Platform/mgw-module-manager/lib/model"
 	"net/http"
 	"runtime/debug"
+	"strings"
 	"sync"
 	"time"
 )
 
 const depAdvRef = "network"
+const depIDPlaceholder = "{did}"
 
 type Service struct {
 	certHdl         certificateHandler
@@ -105,7 +107,7 @@ func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error 
 		}
 	} else {
 		if name == "" {
-			name = s.config.DefaultNetworkName
+			name = strings.Replace(s.config.DefaultNetworkName, depIDPlaceholder, s.config.DeploymentID, -1)
 		}
 		newID, err := s.cloudClt.CreateNetwork(ctx, name, token)
 		if err != nil {
