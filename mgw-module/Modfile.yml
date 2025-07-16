@@ -8,14 +8,14 @@ version: v0.0.1
 type: add-on
 deploymentType: single
 services:
-  proxy:
-    name: Proxy
-    image: ghcr.io/senergy-platform/mgw-cloud-proxy:0.0.2
+  gateway:
+    name: Gateway
+    image: ghcr.io/senergy-platform/mgw-cloud-proxy:0.0.3
 volumes:
   cm-data:
     - mountPoint: /opt/cert-manager/data
       services:
-        - proxy
+        - gateway
 inputGroups:
   cm:
     name: Certificate Manager
@@ -41,7 +41,7 @@ configs:
     targets:
       - refVar: LOGGER_LEVEL
         services:
-          - proxy
+          - gateway
     userInput:
       type: text
       name: Level
@@ -55,7 +55,7 @@ configs:
     targets:
       - refVar: HTTP_ACCESS_LOG
         services:
-          - proxy
+          - gateway
     userInput:
       type: text
       name: HTTP access log
@@ -65,7 +65,7 @@ configs:
     targets:
       - refVar: CLOUD_TOKEN_BASE_URL
         services:
-          - proxy
+          - gateway
     userInput:
       type: text
       name: Cloud API URL
@@ -76,13 +76,13 @@ configs:
     targets:
       - refVar: CLOUD_CERT_BASE_URL
         services:
-          - proxy
+          - gateway
   cm-default-network-name:
     value: "mgw-{did}"
     targets:
       - refVar: DEFAULT_NETWORK_NAME
         services:
-          - proxy
+          - gateway
     userInput:
       type: text
       name: Default network name
@@ -94,7 +94,7 @@ configs:
     targets:
       - refVar: DEFAULT_CERT_VALIDITY_PERIOD
         services:
-          - proxy
+          - gateway
     userInput:
       type: text
       name: Default certificate validity period
@@ -105,40 +105,40 @@ configs:
     targets:
       - refVar: MODULE_MANAGER_BASE_URL
         services:
-          - proxy
+          - gateway
   cm-socket-group-id:
     dataType: int
     value: 101
     targets:
       - refVar: SOCKET_GROUP_ID
         services:
-          - proxy
+          - gateway
   proxy-api-gateway-port:
     dataType: int
     value: 80
     targets:
       - refVar: API_GATEWAY_PORT
         services:
-          - proxy
+          - gateway
   proxy-mqtt-gateway-port:
     dataType: int
     value: 1883
     targets:
       - refVar: MQTT_GATEWAY_PORT
         services:
-          - proxy
+          - gateway
   proxy-cert-manager-port:
     dataType: int
     value: 8080
     targets:
       - refVar: CERT_MANAGER_PORT
         services:
-          - proxy
+          - gateway
   proxy-cloud-api-host:
     targets:
       - refVar: CLOUD_API_HOST
         services:
-          - proxy
+          - gateway
     userInput:
       type: text
       name: Host
@@ -149,7 +149,7 @@ configs:
     targets:
       - refVar: CLOUD_API_PORT
         services:
-          - proxy
+          - gateway
     userInput:
       type: number
       name: Port
@@ -158,7 +158,7 @@ configs:
     targets:
       - refVar: CLOUD_MQTT_HOST
         services:
-          - proxy
+          - gateway
     userInput:
       type: text
       name: Host
@@ -169,7 +169,7 @@ configs:
     targets:
       - refVar: CLOUD_MQTT_PORT
         services:
-          - proxy
+          - gateway
     userInput:
       type: number
       name: Port
