@@ -51,7 +51,7 @@ set +e
 ec=1
 
 term_cm() {
-  if pid="$(cat /var/run/cert_manager.pid 2> /dev/null)"; then
+  if pid="$(cat "$PID_FILE_PATH" 2> /dev/null)"; then
     if [ "$pid" != "" ]; then
         kill -SIGTERM $pid 2> /dev/null
       fi
