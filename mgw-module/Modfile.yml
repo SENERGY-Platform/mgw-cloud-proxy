@@ -10,7 +10,7 @@ deploymentType: single
 services:
   gateway:
     name: Gateway
-    image: ghcr.io/senergy-platform/mgw-cloud-proxy:0.0.3
+    image: ghcr.io/senergy-platform/mgw-cloud-proxy:0.0.4
     httpEndpoints:
       - name: Cert Manager
         port: 8080
@@ -110,11 +110,23 @@ configs:
       - refVar: MODULE_MANAGER_BASE_URL
         services:
           - gateway
+  cm-socket-path:
+    value: "/var/run/cert_manager.sock"
+    targets:
+      - refVar: SOCKET_PATH
+        services:
+          - gateway
   cm-socket-group-id:
     dataType: int
     value: 101
     targets:
       - refVar: SOCKET_GROUP_ID
+        services:
+          - gateway
+  cm-pid-file-path:
+    value: "/var/run/cert_manager.pid"
+    targets:
+      - refVar: PID_FILE_PATH
         services:
           - gateway
   proxy-api-gateway-port:
