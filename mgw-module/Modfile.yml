@@ -11,6 +11,10 @@ services:
   gateway:
     name: Gateway
     image: ghcr.io/senergy-platform/mgw-cloud-proxy:0.0.3
+    httpEndpoints:
+      - name: Cert Manager
+        port: 8080
+        extPath: "manager"
 volumes:
   cm-data:
     - mountPoint: /opt/cert-manager/data
