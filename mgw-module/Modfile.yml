@@ -4,7 +4,7 @@ name: Cloud Proxy
 description: Provides access to cloud HTTP APIs and MQTT broker.
 license: Apache-2.0 license
 author: InfAI (CC SES)
-version: v0.0.1
+version: v0.0.2
 type: add-on
 deploymentType: single
 services:
