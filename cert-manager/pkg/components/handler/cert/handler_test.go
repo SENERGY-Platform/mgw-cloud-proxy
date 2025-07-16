@@ -236,6 +236,10 @@ func TestHandler_Renew(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+		err = helper_file.Copy(path.Join("./test", certFile), path.Join(workDir, certFile), certFilePerm)
+		if err != nil {
+			t.Fatal(err)
+		}
 		mockClient := &caClientMock{
 			Subject:    pkix.Name{SerialNumber: "test"},
 			Hostnames:  []string{"test"},
@@ -275,6 +279,10 @@ func TestHandler_Renew(t *testing.T) {
 		workDir := t.TempDir()
 		targetDir := t.TempDir()
 		err := helper_file.Copy(path.Join("./test", keyFile), path.Join(workDir, keyFile), keyFilePerm)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = helper_file.Copy(path.Join("./test", certFile), path.Join(workDir, certFile), certFilePerm)
 		if err != nil {
 			t.Fatal(err)
 		}
