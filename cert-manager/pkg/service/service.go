@@ -279,6 +279,14 @@ func (s *Service) PeriodicCertificateRenewal(ctx context.Context) error {
 		logger.Info("periodic certificate renewal halted")
 	}()
 	timer := time.NewTimer(s.config.InitialDelay)
+	defer func() {
+		if !timer.Stop() {
+			select {
+			case <-timer.C:
+			default:
+			}
+		}
+	}()
 	loop := true
 	for loop {
 		select {
@@ -294,12 +302,6 @@ func (s *Service) PeriodicCertificateRenewal(ctx context.Context) error {
 			loop = false
 			logger.Info("stopping periodic certificate renewal")
 			break
-		}
-	}
-	if !timer.Stop() {
-		select {
-		case <-timer.C:
-		default:
 		}
 	}
 	return lErr
