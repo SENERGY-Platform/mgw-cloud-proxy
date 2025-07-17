@@ -3,7 +3,7 @@ upstream backend {
 }
 server {
     server_name mqtt-gateway;
-    listen ${MQTT_GATEWAY_PORT};
+    listen 1883;
     proxy_pass backend;
     proxy_ssl  on;
     proxy_ssl_certificate /opt/certs/client.crt;

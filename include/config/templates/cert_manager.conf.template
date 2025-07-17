@@ -4,7 +4,7 @@ upstream cert_manager_sock {
 }
 server {
     server_name cert-manager;
-    listen ${CERT_MANAGER_PORT};
+    listen 8080;
     location /api {
         rewrite /api(.*) /$1 break;
         proxy_pass http://cert_manager_sock$1$is_args$args;

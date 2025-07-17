@@ -4,7 +4,7 @@ upstream ${CLOUD_API_HOST} {
 }
 server {
     server_name api-gateway;
-    listen ${API_GATEWAY_PORT};
+    listen 80;
     location / {
         proxy_pass https://${CLOUD_API_HOST}$request_uri;
         proxy_ssl_certificate /opt/certs/client.crt;

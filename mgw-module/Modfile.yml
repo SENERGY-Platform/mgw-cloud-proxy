@@ -131,27 +131,6 @@ configs:
       - refVar: PID_FILE_PATH
         services:
           - gateway
-  proxy-api-gateway-port:
-    dataType: int
-    value: 80
-    targets:
-      - refVar: API_GATEWAY_PORT
-        services:
-          - gateway
-  proxy-mqtt-gateway-port:
-    dataType: int
-    value: 1883
-    targets:
-      - refVar: MQTT_GATEWAY_PORT
-        services:
-          - gateway
-  proxy-cert-manager-port:
-    dataType: int
-    value: 8080
-    targets:
-      - refVar: CERT_MANAGER_PORT
-        services:
-          - gateway
   proxy-cloud-api-host:
     targets:
       - refVar: CLOUD_API_HOST
