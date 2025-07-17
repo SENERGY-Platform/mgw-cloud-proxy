@@ -28,7 +28,7 @@ import (
 
 // New godoc
 // @title Cert-Manager
-// @version 0.0.1
+// @version 0.0.9
 // @description Provides network and certificate management functions.
 // @license.name Apache-2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
