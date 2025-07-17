@@ -142,7 +142,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := srv.PeriodicCertificateRenewal(ctx, time.Hour); err != nil {
+		if err := srv.PeriodicCertificateRenewal(ctx); err != nil {
 			logger.Error("periodic certificate renewal failed", attributes.ErrorKey, err)
 			ec = 1
 		}

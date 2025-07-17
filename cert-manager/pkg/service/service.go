@@ -268,7 +268,7 @@ func (s *Service) ServiceInfo(_ context.Context) (srv_info_hdl.ServiceInfo, erro
 	return s.srvInfoHdl.ServiceInfo(), nil
 }
 
-func (s *Service) PeriodicCertificateRenewal(ctx context.Context, interval time.Duration) error {
+func (s *Service) PeriodicCertificateRenewal(ctx context.Context) error {
 	logger.Info("starting periodic certificate renewal")
 	var lErr error
 	defer func() {
@@ -278,7 +278,7 @@ func (s *Service) PeriodicCertificateRenewal(ctx context.Context, interval time.
 		}
 		logger.Info("periodic certificate renewal halted")
 	}()
-	timer := time.NewTimer(interval)
+	timer := time.NewTimer(s.config.InitialDelay)
 	loop := true
 	for loop {
 		select {
@@ -289,7 +289,7 @@ func (s *Service) PeriodicCertificateRenewal(ctx context.Context, interval time.
 					logger.Error("certificate renewal failed", attributes.ErrorKey, err)
 				}
 			}
-			timer.Reset(interval)
+			timer.Reset(s.config.CheckInterval)
 		case <-ctx.Done():
 			loop = false
 			logger.Info("stopping periodic certificate renewal")

@@ -47,7 +47,6 @@ type Config struct {
 	Cloud         CloudConfig            `json:"cloud"`
 	Service       service.Config         `json:"service"`
 	DepAdv        DepAdvConfig           `json:"dep_adv"`
-	CheckInterval time.Duration          `json:"check_interval" env_var:"CHECK_INTERVAL"`
 	HttpAccessLog bool                   `json:"http_access_log" env_var:"HTTP_ACCESS_LOG"`
 }
 
@@ -82,8 +81,9 @@ func New(path string) (*Config, error) {
 		},
 		Service: service.Config{
 			DefaultCertValidityPeriod: time.Hour * 2160,
+			InitialDelay:              time.Second * 30,
+			CheckInterval:             time.Minute * 30,
 		},
-		CheckInterval: time.Hour,
 	}
 	err := sb_config_hdl.Load(&cfg, nil, envTypeParser, nil, path)
 	return &cfg, err
