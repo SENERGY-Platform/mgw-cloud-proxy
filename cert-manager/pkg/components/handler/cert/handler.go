@@ -15,8 +15,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/cert"
 	helper_file "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/components/helper/file"
-	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/cert"
 	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/error"
 	"os"
 	"path"
@@ -229,13 +229,13 @@ func (h *Handler) deploy() error {
 
 func newPrivateKey(algo string) (key any, err error) {
 	switch strings.ToUpper(algo) {
-	case models_cert.AlgoRSA:
+	case AlgoRSA:
 		key, err = rsa.GenerateKey(rand.Reader, 4096)
-	case models_cert.AlgoECDH:
+	case AlgoECDH:
 		key, err = ecdh.P521().GenerateKey(rand.Reader)
-	case models_cert.AlgoECDSA:
+	case AlgoECDSA:
 		key, err = ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
-	case models_cert.AlgoEd25519:
+	case AlgoEd25519:
 		key, _, err = ed25519.GenerateKey(rand.Reader)
 	default:
 		err = fmt.Errorf("algorithm '%s' not supported", algo)

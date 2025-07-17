@@ -1,14 +1,18 @@
 package cert
 
-import (
-	"time"
-)
+import "time"
 
 const (
-	AlgoRSA     = "RSA"
-	AlgoECDH    = "ECDH"
-	AlgoECDSA   = "ECDSA"
-	AlgoEd25519 = "Ed25519"
+	CRLReasonUnspecified          = "unspecified"
+	CRLReasonKeyCompromise        = "keyCompromise"
+	CRLReasonCACompromise         = "cACompromise"
+	CRLReasonAffiliationChanged   = "affiliationChanged"
+	CRLReasonSuperseded           = "superseded"
+	CRLReasonCessationOfOperation = "cessationOfOperation"
+	CRLReasonCertificateHold      = "certificateHold"
+	CRLReasonRemoveFromCRL        = "removeFromCRL"
+	CRLReasonPrivilegeWithdrawn   = "privilegeWithdrawn"
+	CRLReasonAACompromise         = "aACompromise"
 )
 
 type Info struct {

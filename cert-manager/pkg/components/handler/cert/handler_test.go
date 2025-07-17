@@ -9,8 +9,8 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"errors"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/cert"
 	helper_file "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/components/helper/file"
-	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/cert"
 	"log/slog"
 	"os"
 	"path"
@@ -103,7 +103,7 @@ func TestHandler_New(t *testing.T) {
 		h := New(mockClient, Config{
 			WorkDirPath:         workDir,
 			TargetDirPath:       targetDir,
-			PrivateKeyAlgorithm: models_cert.AlgoRSA,
+			PrivateKeyAlgorithm: AlgoRSA,
 		})
 		err := h.New(context.Background(), models_cert.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, nil, "test")
 		if err != nil {
@@ -219,7 +219,7 @@ func TestHandler_New(t *testing.T) {
 		h := New(mockClient, Config{
 			WorkDirPath:         workDir,
 			TargetDirPath:       targetDir,
-			PrivateKeyAlgorithm: models_cert.AlgoRSA,
+			PrivateKeyAlgorithm: AlgoRSA,
 		})
 		err := h.New(context.Background(), models_cert.DistinguishedName{SerialNumber: "test"}, []string{"test"}, time.Second, nil, "test")
 		if err == nil {

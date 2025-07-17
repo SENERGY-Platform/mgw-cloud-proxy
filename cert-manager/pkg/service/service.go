@@ -22,10 +22,10 @@ import (
 	"fmt"
 	srv_info_hdl "github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/cert"
+	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/service"
 	client_cloud "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/components/clients/cloud"
-	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/cert"
 	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/error"
-	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/service"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/slog_attr"
 	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/storage"
 	mm_model "github.com/SENERGY-Platform/mgw-module-manager/lib/model"
@@ -85,7 +85,9 @@ func (s *Service) NetworkInfo(ctx context.Context, token string) (models_service
 		cs.Code = http.StatusOK
 	}
 	return models_service.NetworkInfo{
-		NetworkData: data,
+		ID:          data.ID,
+		UserID:      data.UserID,
+		Added:       data.Added,
 		CloudStatus: cs,
 	}, nil
 }
@@ -170,9 +172,10 @@ func (s *Service) CertificateInfo(ctx context.Context) (models_service.CertInfo,
 		logger.Error("reading certificate data failed", attributes.ErrorKey, err)
 	}
 	return models_service.CertInfo{
-		Info:        certInfo,
-		CertData:    data,
-		LastChecked: s.renewCertTime,
+		Info:           certInfo,
+		ValidityPeriod: data.ValidityPeriod,
+		Created:        data.Created,
+		LastChecked:    s.renewCertTime,
 	}, nil
 }
 

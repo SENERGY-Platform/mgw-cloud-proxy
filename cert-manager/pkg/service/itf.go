@@ -19,8 +19,8 @@ package service
 import (
 	"context"
 	"github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/cert"
 	client_cloud "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/components/clients/cloud"
-	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/cert"
 	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/storage"
 	mm_model "github.com/SENERGY-Platform/mgw-module-manager/lib/model"
 	"time"

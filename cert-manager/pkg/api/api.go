@@ -19,7 +19,7 @@ package api
 import (
 	gin_mw "github.com/SENERGY-Platform/gin-middleware"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
-	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/api"
+	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/api"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/slog_attr"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"

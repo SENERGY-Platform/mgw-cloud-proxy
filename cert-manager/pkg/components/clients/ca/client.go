@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/SENERGY-Platform/cert-certificate-authority/pkg/client"
-	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/cert"
 	"net/http"
 	"net/url"
 	"time"
@@ -78,11 +77,11 @@ func privateKeyForCA(key any) (*rsa.PrivateKey, error) {
 	case *rsa.PrivateKey:
 		return pk, nil
 	case *ecdh.PrivateKey:
-		return nil, fmt.Errorf(errFormat, models_cert.AlgoECDH)
+		return nil, fmt.Errorf(errFormat, "ECDH")
 	case *ecdsa.PrivateKey:
-		return nil, fmt.Errorf(errFormat, models_cert.AlgoECDSA)
+		return nil, fmt.Errorf(errFormat, "ECDSA")
 	case ed25519.PrivateKey:
-		return nil, fmt.Errorf(errFormat, models_cert.AlgoEd25519)
+		return nil, fmt.Errorf(errFormat, "Ed25519")
 	default:
 		return nil, errors.New("algorithm not supported")
 	}

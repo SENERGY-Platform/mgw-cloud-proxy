@@ -1,5 +1,12 @@
 package cert
 
+const (
+	AlgoRSA     = "RSA"
+	AlgoECDH    = "ECDH"
+	AlgoECDSA   = "ECDSA"
+	AlgoEd25519 = "Ed25519"
+)
+
 type Config struct {
 	WorkDirPath         string `json:"work_dir_path" env_var:"CERT_HDL_WORKDIR"`
 	TargetDirPath       string `json:"target_dir_path" env_var:"CERT_HDL_TARGET_DIR"`

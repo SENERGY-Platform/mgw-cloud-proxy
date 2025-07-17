@@ -21,7 +21,6 @@ import (
 	"github.com/SENERGY-Platform/go-service-base/struct-logger"
 	handler_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/components/handler/cert"
 	helper_listener "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/components/helper/listener"
-	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/cert"
 	"github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/service"
 	"os"
 	"time"
@@ -71,7 +70,7 @@ func New(path string) (*Config, error) {
 			WorkDirPath:         "/opt/cert-manager/data/certs",
 			TargetDirPath:       "/opt/certs",
 			DummyDirPath:        "/opt/dummy-certs",
-			PrivateKeyAlgorithm: models_cert.AlgoRSA,
+			PrivateKeyAlgorithm: handler_cert.AlgoRSA,
 		},
 		Cloud: CloudConfig{
 			HttpTimeout: time.Minute,

@@ -19,9 +19,9 @@ package api
 import (
 	"encoding/base64"
 	_ "github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
-	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/api"
+	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/api"
+	_ "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/service"
 	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/error"
-	_ "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"

@@ -6,7 +6,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/api"
+	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/api"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/cert"
+	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/service"
 	"io"
 	"net/http"
 	"net/url"
@@ -29,18 +31,18 @@ func New(httpClient HTTPClient, baseUrl string) *Client {
 	}
 }
 
-func (c *Client) NetworkInfo(ctx context.Context, token string) (NetworkInfo, error) {
+func (c *Client) NetworkInfo(ctx context.Context, token string) (models_service.NetworkInfo, error) {
 	u, err := url.JoinPath(c.baseUrl, "network")
 	if err != nil {
-		return NetworkInfo{}, err
+		return models_service.NetworkInfo{}, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
-		return NetworkInfo{}, err
+		return models_service.NetworkInfo{}, err
 	}
-	var info NetworkInfo
+	var info models_service.NetworkInfo
 	if err = c.doJson(req, &info); err != nil {
-		return NetworkInfo{}, err
+		return models_service.NetworkInfo{}, err
 	}
 	return info, nil
 }
@@ -92,23 +94,23 @@ func (c *Client) AdvertiseNetwork(ctx context.Context) error {
 	return c.doErr(req)
 }
 
-func (c *Client) CertificateInfo(ctx context.Context) (CertInfo, error) {
+func (c *Client) CertificateInfo(ctx context.Context) (models_service.CertInfo, error) {
 	u, err := url.JoinPath(c.baseUrl, "certificate")
 	if err != nil {
-		return CertInfo{}, err
+		return models_service.CertInfo{}, err
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
-		return CertInfo{}, err
+		return models_service.CertInfo{}, err
 	}
-	var info CertInfo
+	var info models_service.CertInfo
 	if err = c.doJson(req, &info); err != nil {
-		return CertInfo{}, err
+		return models_service.CertInfo{}, err
 	}
 	return info, nil
 }
 
-func (c *Client) NewCertificate(ctx context.Context, dn DistinguishedName, validityPeriod time.Duration, userPrivateKey []byte, token string) error {
+func (c *Client) NewCertificate(ctx context.Context, dn models_cert.DistinguishedName, validityPeriod time.Duration, userPrivateKey []byte, token string) error {
 	u, err := url.JoinPath(c.baseUrl, "certificate")
 	if err != nil {
 		return err
@@ -136,7 +138,7 @@ func (c *Client) NewCertificate(ctx context.Context, dn DistinguishedName, valid
 	return c.doErr(req)
 }
 
-func (c *Client) RenewCertificate(ctx context.Context, dn DistinguishedName, validityPeriod time.Duration, token string) error {
+func (c *Client) RenewCertificate(ctx context.Context, dn models_cert.DistinguishedName, validityPeriod time.Duration, token string) error {
 	u, err := url.JoinPath(c.baseUrl, "certificate")
 	if err != nil {
 		return err
@@ -187,22 +189,6 @@ func (c *Client) DeployCertificate(ctx context.Context) error {
 		return err
 	}
 	return c.doErr(req)
-}
-
-func (c *Client) ServiceInfo(ctx context.Context) (ServiceInfo, error) {
-	u, err := url.JoinPath(c.baseUrl, "info")
-	if err != nil {
-		return ServiceInfo{}, err
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
-	if err != nil {
-		return ServiceInfo{}, err
-	}
-	var info ServiceInfo
-	if err = c.doJson(req, &info); err != nil {
-		return ServiceInfo{}, err
-	}
-	return info, nil
 }
 
 func (c *Client) doJson(req *http.Request, v any) error {
