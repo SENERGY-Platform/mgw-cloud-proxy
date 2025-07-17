@@ -26,6 +26,16 @@ import (
 	"log/slog"
 )
 
+func init() {
+	gin.SetMode(gin.ReleaseMode)
+}
+
+type Api struct {
+	service   serviceItf
+	infoHdl   infoHandler
+	ginEngine *gin.Engine
+}
+
 // New godoc
 // @title Cert-Manager
 // @version 0.0.9
@@ -33,9 +43,8 @@ import (
 // @license.name Apache-2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
 // @BasePath /
-func New(srv Service, staticHeader map[string]string, logger *slog.Logger, accessLog bool) (*gin.Engine, error) {
-	gin.SetMode(gin.ReleaseMode)
-	httpHandler := gin.New()
+func New(service serviceItf, infoHdl infoHandler, staticHeader map[string]string, logger *slog.Logger, accessLog bool) (*Api, error) {
+	ginEngine := gin.New()
 	var middleware []gin.HandlerFunc
 	if accessLog {
 		middleware = append(
@@ -55,16 +64,25 @@ func New(srv Service, staticHeader map[string]string, logger *slog.Logger, acces
 		gin_mw.ErrorHandler(getStatusCode, ", "),
 		gin_mw.StructRecoveryHandler(logger, gin_mw.DefaultRecoveryFunc),
 	)
-	httpHandler.Use(middleware...)
-	httpHandler.UseRawPath = true
-	setRoutes, err := routes.Set(srv, httpHandler)
+	ginEngine.Use(middleware...)
+	ginEngine.UseRawPath = true
+	a := &Api{
+		service:   service,
+		infoHdl:   infoHdl,
+		ginEngine: ginEngine,
+	}
+	setRoutes, err := routes.Set(a, ginEngine)
 	if err != nil {
 		return nil, err
 	}
 	for _, route := range setRoutes {
 		logger.Debug("http route", attributes.MethodKey, route[0], attributes.PathKey, route[1])
 	}
-	return httpHandler, nil
+	return a, nil
+}
+
+func (a *Api) Handler() *gin.Engine {
+	return a.ginEngine
 }
 
 func requestIDGenerator(gc *gin.Context) (string, any) {

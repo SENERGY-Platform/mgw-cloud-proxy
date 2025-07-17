@@ -38,9 +38,9 @@ import (
 // @Failure	404 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /network [get]
-func getNetworkInfo(srv Service) (string, string, gin.HandlerFunc) {
+func getNetworkInfo(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, "/network", func(gc *gin.Context) {
-		info, err := srv.NetworkInfo(gc.Request.Context(), gc.GetHeader(models_api.HeaderAuth))
+		info, err := a.service.NetworkInfo(gc.Request.Context(), gc.GetHeader(models_api.HeaderAuth))
 		if err != nil {
 			_ = gc.Error(err)
 			return
@@ -60,7 +60,7 @@ func getNetworkInfo(srv Service) (string, string, gin.HandlerFunc) {
 // @Failure	400 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /network [post]
-func postNewNetwork(srv Service) (string, string, gin.HandlerFunc) {
+func postNewNetwork(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodPost, "/network", func(gc *gin.Context) {
 		var req models_api.NewNetworkRequest
 		err := gc.ShouldBindJSON(&req)
@@ -68,7 +68,7 @@ func postNewNetwork(srv Service) (string, string, gin.HandlerFunc) {
 			_ = gc.Error(models_error.NewInputErr(err))
 			return
 		}
-		err = srv.NewNetwork(gc.Request.Context(), req.ID, req.Name, gc.GetHeader(models_api.HeaderAuth))
+		err = a.service.NewNetwork(gc.Request.Context(), req.ID, req.Name, gc.GetHeader(models_api.HeaderAuth))
 		if err != nil {
 			_ = gc.Error(err)
 			return
@@ -85,9 +85,9 @@ func postNewNetwork(srv Service) (string, string, gin.HandlerFunc) {
 // @Failure	404 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /network [delete]
-func deleteRemoveNetwork(srv Service) (string, string, gin.HandlerFunc) {
+func deleteRemoveNetwork(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodDelete, "/network", func(gc *gin.Context) {
-		err := srv.RemoveNetwork(gc.Request.Context())
+		err := a.service.RemoveNetwork(gc.Request.Context())
 		if err != nil {
 			_ = gc.Error(err)
 			return
@@ -104,9 +104,9 @@ func deleteRemoveNetwork(srv Service) (string, string, gin.HandlerFunc) {
 // @Failure	404 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /network/advertise [patch]
-func patchAdvertiseNetwork(srv Service) (string, string, gin.HandlerFunc) {
+func patchAdvertiseNetwork(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodPatch, "/network/advertise", func(gc *gin.Context) {
-		err := srv.AdvertiseNetwork(gc.Request.Context())
+		err := a.service.AdvertiseNetwork(gc.Request.Context())
 		if err != nil {
 			_ = gc.Error(err)
 			return
@@ -124,9 +124,9 @@ func patchAdvertiseNetwork(srv Service) (string, string, gin.HandlerFunc) {
 // @Failure	404 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /certificate [get]
-func getCertificateInfo(srv Service) (string, string, gin.HandlerFunc) {
+func getCertificateInfo(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, "/certificate", func(gc *gin.Context) {
-		info, err := srv.CertificateInfo(gc.Request.Context())
+		info, err := a.service.CertificateInfo(gc.Request.Context())
 		if err != nil {
 			_ = gc.Error(err)
 			return
@@ -151,7 +151,7 @@ func getCertificateInfo(srv Service) (string, string, gin.HandlerFunc) {
 // @Failure	400 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /certificate [post]
-func postNewCertificate(srv Service) (string, string, gin.HandlerFunc) {
+func postNewCertificate(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodPost, "/certificate", func(gc *gin.Context) {
 		var req models_api.NewCertRequest
 		err := gc.ShouldBindJSON(&req)
@@ -175,7 +175,7 @@ func postNewCertificate(srv Service) (string, string, gin.HandlerFunc) {
 				return
 			}
 		}
-		err = srv.NewCertificate(gc.Request.Context(), req.DistinguishedName, validityPeriod, keyBytes, gc.GetHeader(models_api.HeaderAuth))
+		err = a.service.NewCertificate(gc.Request.Context(), req.DistinguishedName, validityPeriod, keyBytes, gc.GetHeader(models_api.HeaderAuth))
 		if err != nil {
 			_ = gc.Error(err)
 			return
@@ -196,7 +196,7 @@ func postNewCertificate(srv Service) (string, string, gin.HandlerFunc) {
 // @Failure	404 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /certificate [patch]
-func patchRenewCertificate(srv Service) (string, string, gin.HandlerFunc) {
+func patchRenewCertificate(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodPatch, "/certificate", func(gc *gin.Context) {
 		var req models_api.RenewCertRequest
 		err := gc.ShouldBindJSON(&req)
@@ -212,7 +212,7 @@ func patchRenewCertificate(srv Service) (string, string, gin.HandlerFunc) {
 				return
 			}
 		}
-		err = srv.RenewCertificate(gc.Request.Context(), req.DistinguishedName, validityPeriod, gc.GetHeader(models_api.HeaderAuth))
+		err = a.service.RenewCertificate(gc.Request.Context(), req.DistinguishedName, validityPeriod, gc.GetHeader(models_api.HeaderAuth))
 		if err != nil {
 			_ = gc.Error(err)
 			return
@@ -231,9 +231,9 @@ func patchRenewCertificate(srv Service) (string, string, gin.HandlerFunc) {
 // @Failure	404 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /certificate [delete]
-func deleteRemoveCertificate(srv Service) (string, string, gin.HandlerFunc) {
+func deleteRemoveCertificate(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodDelete, "/certificate", func(gc *gin.Context) {
-		err := srv.RemoveCertificate(gc.Request.Context(), gc.Query("reason"), gc.GetHeader(models_api.HeaderAuth))
+		err := a.service.RemoveCertificate(gc.Request.Context(), gc.Query("reason"), gc.GetHeader(models_api.HeaderAuth))
 		if err != nil {
 			_ = gc.Error(err)
 			return
@@ -250,9 +250,9 @@ func deleteRemoveCertificate(srv Service) (string, string, gin.HandlerFunc) {
 // @Failure	404 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /certificate/deploy [patch]
-func patchDeployCertificate(srv Service) (string, string, gin.HandlerFunc) {
+func patchDeployCertificate(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodPatch, "/certificate/deploy", func(gc *gin.Context) {
-		err := srv.DeployCertificate(gc.Request.Context())
+		err := a.service.DeployCertificate(gc.Request.Context())
 		if err != nil {
 			_ = gc.Error(err)
 			return
@@ -269,18 +269,13 @@ func patchDeployCertificate(srv Service) (string, string, gin.HandlerFunc) {
 // @Success	200 {object} srv_info_hdl.ServiceInfo "service info"
 // @Failure	500 {string} string "error message"
 // @Router /info [get]
-func getInfoH(srv Service) (string, string, gin.HandlerFunc) {
+func getInfoH(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, "/info", func(gc *gin.Context) {
-		info, err := srv.ServiceInfo(gc.Request.Context())
-		if err != nil {
-			_ = gc.Error(err)
-			return
-		}
-		gc.JSON(http.StatusOK, info)
+		gc.JSON(http.StatusOK, a.infoHdl.ServiceInfo())
 	}
 }
 
-func getSwagger(_ Service) (string, string, gin.HandlerFunc) {
+func getSwagger(_ *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, "/swagger", func(gc *gin.Context) {
 		if _, err := os.Stat("/opt/cert-manager/docs/swagger.json"); err != nil {
 			_ = gc.Error(err)

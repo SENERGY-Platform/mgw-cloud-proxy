@@ -103,12 +103,12 @@ func main() {
 		client_cloud.New(helper_http.NewClient(cfg.Cloud.HttpTimeout), cfg.Cloud.CertBaseUrl, cfg.Cloud.TokenBaseUrl),
 		helper_jwt.GetSubject,
 		helper_nginx.Reload,
-		srvInfoHdl,
 		cfg.Service,
 	)
 
-	httpHandler, err := api.New(
+	httpApi, err := api.New(
 		srv,
+		srvInfoHdl,
 		map[string]string{
 			models_api.HeaderApiVer:  srvInfoHdl.Version(),
 			models_api.HeaderSrvName: srvInfoHdl.Name(),
@@ -122,7 +122,7 @@ func main() {
 		return
 	}
 
-	httpServer := &http.Server{Handler: httpHandler}
+	httpServer := &http.Server{Handler: httpApi.Handler()}
 	serverListener, err := helper_listener.NewUnix(cfg.Socket)
 	if err != nil {
 		logger.Error("creating server listener failed", attributes.ErrorKey, err)
