@@ -22,6 +22,10 @@ COPY include/docker-entrypoint.sh /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
+EXPOSE 80
+EXPOSE 1883
+EXPOSE 8080
+
 STOPSIGNAL SIGQUIT
 
 CMD ["nginx", "-g", "'daemon off;'"]
