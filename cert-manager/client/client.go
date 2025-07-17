@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/api"
+	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/api"
 	"io"
 	"net/http"
 	"net/url"

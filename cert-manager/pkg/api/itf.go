@@ -19,8 +19,8 @@ package api
 import (
 	"context"
 	srv_info_hdl "github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
-	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
-	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/service"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/cert"
+	models_service "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/service"
 	"time"
 )
 

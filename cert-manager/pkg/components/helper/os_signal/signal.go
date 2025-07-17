@@ -18,7 +18,7 @@ package os_signal
 
 import (
 	"context"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/slog_attr"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/slog_attr"
 	"log/slog"
 	"os"
 	"os/signal"

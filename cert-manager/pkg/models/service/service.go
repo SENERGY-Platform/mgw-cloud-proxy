@@ -1,8 +1,8 @@
 package service
 
 import (
-	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
-	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/storage"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/cert"
+	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/storage"
 	"time"
 )
 

@@ -18,7 +18,7 @@ package api
 
 import (
 	"errors"
-	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/error"
+	models_error "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/error"
 	"net/http"
 )
 

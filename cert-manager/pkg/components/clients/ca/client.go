@@ -10,7 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/SENERGY-Platform/cert-certificate-authority/pkg/client"
-	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/cert"
 	"net/http"
 	"net/url"
 	"time"

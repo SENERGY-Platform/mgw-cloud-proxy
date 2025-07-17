@@ -19,10 +19,10 @@ package config
 import (
 	sb_config_hdl "github.com/SENERGY-Platform/go-service-base/config-hdl"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger"
-	handler_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/handler/cert"
-	helper_listener "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/components/helper/listener"
-	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/service"
+	handler_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/components/handler/cert"
+	helper_listener "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/components/helper/listener"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/cert"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/service"
 	"os"
 	"time"
 )

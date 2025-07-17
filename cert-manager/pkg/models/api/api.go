@@ -1,7 +1,7 @@
 package api
 
 import (
-	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/cert"
+	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/cert"
 	"time"
 )
 

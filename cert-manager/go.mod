@@ -1,4 +1,4 @@
-module github.com/SENERGY-Platform/mgw-cloud-proxy
+module github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager
 
 go 1.24.0
 

@@ -1,7 +1,7 @@
 package cert
 
 import (
-	"github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/slog_attr"
+	"github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/slog_attr"
 	"log/slog"
 )
 
