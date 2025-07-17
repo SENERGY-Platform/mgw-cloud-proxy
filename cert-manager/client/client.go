@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	models_api "github.com/SENERGY-Platform/mgw-cloud-proxy/pkg/models/api"
 	"io"
 	"net/http"
@@ -163,9 +164,15 @@ func (c *Client) RemoveCertificate(ctx context.Context, reason, token string) er
 	if err != nil {
 		return err
 	}
+	if reason != "" {
+		u += fmt.Sprintf("?reason=%s", reason)
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, u, nil)
 	if err != nil {
 		return err
+	}
+	if token != "" {
+		req.Header.Set(models_api.HeaderAuth, token)
 	}
 	return c.doErr(req)
 }
