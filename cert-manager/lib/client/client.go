@@ -40,6 +40,9 @@ func (c *Client) NetworkInfo(ctx context.Context, token string) (models_service.
 	if err != nil {
 		return models_service.NetworkInfo{}, err
 	}
+	if token != "" {
+		req.Header.Set(models_api.HeaderAuth, token)
+	}
 	var info models_service.NetworkInfo
 	if err = c.doJson(req, &info); err != nil {
 		return models_service.NetworkInfo{}, err
