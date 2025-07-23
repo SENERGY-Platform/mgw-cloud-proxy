@@ -28,19 +28,29 @@ import (
 	"time"
 )
 
+type networkInfoQuery struct {
+	CloudStatus bool `form:"cloud_status"`
+}
+
 // getNetworkInfo godoc
 // @Summary Info
 // @Description Get info like ID, user ID and cloud status of the stored network.
 // @Tags Network
 // @Produce	json
 // @Param Authorization header string false "jwt token"
+// @Param cloud_status query bool false "toggle if cloud status should be retrieved"
 // @Success	200 {object} service.NetworkInfo ""
 // @Failure	404 {string} string "error message"
 // @Failure	500 {string} string "error message"
 // @Router /network [get]
 func getNetworkInfo(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodGet, "/network", func(gc *gin.Context) {
-		info, err := a.service.NetworkInfo(gc.Request.Context(), gc.GetHeader(models_api.HeaderAuth))
+		var query networkInfoQuery
+		if err := gc.ShouldBindQuery(&query); err != nil {
+			_ = gc.Error(models_error.NewInputErr(err))
+			return
+		}
+		info, err := a.service.NetworkInfo(gc.Request.Context(), query.CloudStatus, gc.GetHeader(models_api.HeaderAuth))
 		if err != nil {
 			_ = gc.Error(err)
 			return

@@ -25,7 +25,7 @@ import (
 )
 
 type serviceItf interface {
-	NetworkInfo(ctx context.Context, token string) (models_service.NetworkInfo, error)
+	NetworkInfo(ctx context.Context, cloudStatus bool, token string) (models_service.NetworkInfo, error)
 	NewNetwork(ctx context.Context, id, name, token string) error
 	RemoveNetwork(ctx context.Context) error
 	AdvertiseNetwork(ctx context.Context) error

@@ -62,7 +62,7 @@ func New(certHandler certificateHandler, storageHdl storageHandler, depAdvClt de
 	}
 }
 
-func (s *Service) NetworkInfo(ctx context.Context, token string) (models_service.NetworkInfo, error) {
+func (s *Service) NetworkInfo(ctx context.Context, cloudStatus bool, token string) (models_service.NetworkInfo, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	data, err := s.storageHdl.ReadNetwork(ctx)
@@ -70,16 +70,18 @@ func (s *Service) NetworkInfo(ctx context.Context, token string) (models_service
 		return models_service.NetworkInfo{}, err
 	}
 	var cs models_service.CloudStatus
-	_, err = s.cloudClt.GetNetwork(ctx, data.ID, token)
-	if err != nil {
-		logger.Error("getting network failed", attributes.ErrorKey, err)
-		cs.Error = err.Error()
-		var rErr *client_cloud.ResponseError
-		if errors.As(err, &rErr) {
-			cs.Code = rErr.Code
+	if cloudStatus {
+		_, err = s.cloudClt.GetNetwork(ctx, data.ID, token)
+		if err != nil {
+			logger.Error("getting network failed", attributes.ErrorKey, err)
+			cs.Error = err.Error()
+			var rErr *client_cloud.ResponseError
+			if errors.As(err, &rErr) {
+				cs.Code = rErr.Code
+			}
+		} else {
+			cs.Code = http.StatusOK
 		}
-	} else {
-		cs.Code = http.StatusOK
 	}
 	return models_service.NetworkInfo{
 		ID:          data.ID,

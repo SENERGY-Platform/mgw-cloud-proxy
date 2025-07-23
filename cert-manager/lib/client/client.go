@@ -31,10 +31,13 @@ func New(httpClient HTTPClient, baseUrl string) *Client {
 	}
 }
 
-func (c *Client) NetworkInfo(ctx context.Context, token string) (models_service.NetworkInfo, error) {
+func (c *Client) NetworkInfo(ctx context.Context, cloudStatus bool, token string) (models_service.NetworkInfo, error) {
 	u, err := url.JoinPath(c.baseUrl, "network")
 	if err != nil {
 		return models_service.NetworkInfo{}, err
+	}
+	if cloudStatus {
+		u += "cloud_status=true"
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
