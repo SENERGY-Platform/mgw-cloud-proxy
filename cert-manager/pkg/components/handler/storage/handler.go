@@ -19,6 +19,8 @@ const (
 
 type Handler struct {
 	workDirPath string
+	certData    *models_storage.CertData
+	networkData *models_storage.NetworkData
 	mu          sync.RWMutex
 }
 
@@ -27,33 +29,45 @@ func New(workDirPath string) *Handler {
 }
 
 func (h *Handler) Init() error {
-	return os.MkdirAll(h.workDirPath, 0666)
+	err := os.MkdirAll(h.workDirPath, 0666)
+	if err != nil {
+		return err
+	}
+	var certData models_storage.CertData
+	if err = read(path.Join(h.workDirPath, certDataFile), &certData); err != nil {
+		if !os.IsNotExist(err) {
+			return err
+		}
+	} else {
+		h.certData = &certData
+	}
+	var networkData models_storage.NetworkData
+	if err = read(path.Join(h.workDirPath, netDataFile), &networkData); err != nil {
+		if !os.IsNotExist(err) {
+			return err
+		}
+	} else {
+		h.networkData = &networkData
+	}
+	return nil
 }
 
 func (h *Handler) ReadCertificate(_ context.Context) (models_storage.CertData, error) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
-	var data models_storage.CertData
-	if err := read(path.Join(h.workDirPath, certDataFile), &data); err != nil {
-		if os.IsNotExist(err) {
-			return models_storage.CertData{}, models_error.NoCertificateDataErr
-		}
-		return models_storage.CertData{}, err
+	if h.certData == nil {
+		return models_storage.CertData{}, models_error.NoCertificateDataErr
 	}
-	return data, nil
+	return *h.certData, nil
 }
 
 func (h *Handler) ReadNetwork(_ context.Context) (models_storage.NetworkData, error) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
-	var data models_storage.NetworkData
-	if err := read(path.Join(h.workDirPath, netDataFile), &data); err != nil {
-		if os.IsNotExist(err) {
-			return models_storage.NetworkData{}, models_error.NoNetworkDataErr
-		}
-		return models_storage.NetworkData{}, err
+	if h.networkData == nil {
+		return models_storage.NetworkData{}, models_error.NoNetworkDataErr
 	}
-	return data, nil
+	return *h.networkData, nil
 }
 
 func (h *Handler) WriteCertificate(_ context.Context, data models_storage.CertData) error {
@@ -62,6 +76,7 @@ func (h *Handler) WriteCertificate(_ context.Context, data models_storage.CertDa
 	if err := write(path.Join(h.workDirPath, certDataFile), data); err != nil {
 		return err
 	}
+	h.certData = &data
 	return nil
 }
 
@@ -71,6 +86,7 @@ func (h *Handler) WriteNetwork(_ context.Context, data models_storage.NetworkDat
 	if err := write(path.Join(h.workDirPath, netDataFile), data); err != nil {
 		return err
 	}
+	h.networkData = &data
 	return nil
 }
 
@@ -84,6 +100,7 @@ func (h *Handler) RemoveCertificate(_ context.Context) error {
 		}
 		return err
 	}
+	h.certData = nil
 	return nil
 }
 
@@ -97,6 +114,7 @@ func (h *Handler) RemoveNetwork(_ context.Context) error {
 		}
 		return err
 	}
+	h.networkData = nil
 	return nil
 }
 
