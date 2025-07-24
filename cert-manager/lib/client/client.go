@@ -37,7 +37,7 @@ func (c *Client) NetworkInfo(ctx context.Context, cloudStatus bool, token string
 		return models_service.NetworkInfo{}, err
 	}
 	if cloudStatus {
-		u += "cloud_status=true"
+		u += "?cloud_status=true"
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
