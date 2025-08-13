@@ -64,8 +64,8 @@ func getNetworkInfo(a *Api) (string, string, gin.HandlerFunc) {
 // @Description Add an existing network or create a new network.
 // @Tags Network
 // @Accept json
-// @Param Authorization header string false "jwt token"
-// @Param data body models_api.NewNetworkRequest true "network data"
+// @Param Authorization header string true "jwt token"
+// @Param data body models_api.NewNetworkRequest false "network data"
 // @Success	200
 // @Failure	400 {string} string "error message"
 // @Failure	500 {string} string "error message"
@@ -73,7 +73,7 @@ func getNetworkInfo(a *Api) (string, string, gin.HandlerFunc) {
 func postNewNetwork(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodPost, "/network", func(gc *gin.Context) {
 		var req models_api.NewNetworkRequest
-		err := gc.ShouldBindJSON(&req)
+		err := gc.ShouldBindWith(&req, jsonBinding{})
 		if err != nil {
 			_ = gc.Error(models_error.NewInputErr(err))
 			return
