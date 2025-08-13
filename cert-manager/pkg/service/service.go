@@ -126,6 +126,10 @@ func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error 
 	}
 	err = s.depAdvClt.PutDepAdvertisement(ctx, s.config.DeploymentID, newDepAdvBase(id))
 	if err != nil {
+		if s.config.DeveloperMode {
+			logger.Error("publishing network advertisement failed", attributes.ErrorKey, err)
+			return nil
+		}
 		return err
 	}
 	return nil
@@ -140,6 +144,10 @@ func (s *Service) RemoveNetwork(ctx context.Context) error {
 	}
 	err = s.depAdvClt.DeleteDepAdvertisement(ctx, s.config.DeploymentID, depAdvRef)
 	if err != nil {
+		if s.config.DeveloperMode {
+			logger.Error("removing network advertisement failed", attributes.ErrorKey, err)
+			return nil
+		}
 		return err
 	}
 	return nil
@@ -154,6 +162,10 @@ func (s *Service) AdvertiseNetwork(ctx context.Context) error {
 	}
 	err = s.depAdvClt.PutDepAdvertisement(ctx, s.config.DeploymentID, newDepAdvBase(data.ID))
 	if err != nil {
+		if s.config.DeveloperMode {
+			logger.Error("publishing network advertisement failed", attributes.ErrorKey, err)
+			return nil
+		}
 		return err
 	}
 	return nil

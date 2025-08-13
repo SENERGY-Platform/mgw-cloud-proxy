@@ -8,4 +8,5 @@ type Config struct {
 	DeploymentID              string        `json:"deployment_id" env_var:"MGW_DID"`
 	InitialDelay              time.Duration `json:"initial_delay" env_var:"INITIAL_DELAY"`
 	CheckInterval             time.Duration `json:"check_interval" env_var:"CHECK_INTERVAL"`
+	DeveloperMode             bool          `json:"developer_mode" env_var:"DEVELOPER_MODE"`
 }
