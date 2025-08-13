@@ -18,7 +18,6 @@ package service
 
 import (
 	"context"
-	"github.com/SENERGY-Platform/go-service-base/srv-info-hdl"
 	models_cert "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib/models/cert"
 	client_cloud "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/components/clients/cloud"
 	models_storage "github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/pkg/models/storage"
@@ -46,10 +45,6 @@ type storageHandler interface {
 type cloudClient interface {
 	CreateNetwork(ctx context.Context, name, token string) (string, error)
 	GetNetwork(ctx context.Context, id, token string) (client_cloud.Network, error)
-}
-
-type serviceInfoHandler interface {
-	ServiceInfo() srv_info_hdl.ServiceInfo
 }
 
 type deploymentAdvertisementsClient interface {
