@@ -30,6 +30,7 @@ var routes = gin_mw.Routes[*Api]{
 	patchRenewCertificate,
 	deleteRemoveCertificate,
 	patchDeployCertificate,
+	patchRefreshNetworkAndCertificate,
 	getInfoH,
 	getSwagger,
 }

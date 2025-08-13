@@ -271,6 +271,25 @@ func patchDeployCertificate(a *Api) (string, string, gin.HandlerFunc) {
 	}
 }
 
+// patchRefreshNetworkAndCertificate godoc
+// @Summary Refresh network and certificate
+// @Description Convenience function.
+// @Tags Network & Certificate
+// @Param Authorization header string true "jwt token"
+// @Success	200
+// @Failure	500 {string} string "error message"
+// @Router /refresh [patch]
+func patchRefreshNetworkAndCertificate(a *Api) (string, string, gin.HandlerFunc) {
+	return http.MethodPatch, "/refresh", func(gc *gin.Context) {
+		err := a.service.RefreshNetworkAndCertificate(gc.Request.Context(), gc.GetHeader(models_api.HeaderAuth))
+		if err != nil {
+			_ = gc.Error(err)
+			return
+		}
+		gc.Status(http.StatusOK)
+	}
+}
+
 // getInfoH godoc
 // @Summary Info
 // @Description Get service information like version, uptime and memory usage.

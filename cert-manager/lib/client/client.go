@@ -197,6 +197,21 @@ func (c *Client) DeployCertificate(ctx context.Context) error {
 	return c.doErr(req)
 }
 
+func (c *Client) RefreshNetworkAndCertificate(ctx context.Context, token string) error {
+	u, err := url.JoinPath(c.baseUrl, "refresh")
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, u, nil)
+	if err != nil {
+		return err
+	}
+	if token != "" {
+		req.Header.Set(models_api.HeaderAuth, token)
+	}
+	return c.doErr(req)
+}
+
 func (c *Client) doJson(req *http.Request, v any) error {
 	resp, err := c.client.Do(req)
 	if err != nil {

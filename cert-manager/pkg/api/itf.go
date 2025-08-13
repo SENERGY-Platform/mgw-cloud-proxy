@@ -34,6 +34,7 @@ type serviceItf interface {
 	RenewCertificate(ctx context.Context, dn models_cert.DistinguishedName, validityPeriod time.Duration, token string) error
 	RemoveCertificate(ctx context.Context, reason, token string) error
 	DeployCertificate(ctx context.Context) error
+	RefreshNetworkAndCertificate(ctx context.Context, token string) error
 }
 
 type infoHandler interface {
