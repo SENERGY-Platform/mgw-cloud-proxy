@@ -63,7 +63,6 @@
                         "description": "cert data",
                         "name": "data",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/api.NewCertRequest"
                         }
@@ -145,7 +144,6 @@
                         "description": "cert data",
                         "name": "data",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/api.RenewCertRequest"
                         }
@@ -287,13 +285,13 @@
                         "type": "string",
                         "description": "jwt token",
                         "name": "Authorization",
-                        "in": "header"
+                        "in": "header",
+                        "required": true
                     },
                     {
                         "description": "network data",
                         "name": "data",
                         "in": "body",
-                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/api.NewNetworkRequest"
                         }
@@ -677,13 +675,17 @@
                 1,
                 1000,
                 1000000,
-                1000000000
+                1000000000,
+                60000000000,
+                3600000000000
             ],
             "x-enum-varnames": [
                 "Nanosecond",
                 "Microsecond",
                 "Millisecond",
-                "Second"
+                "Second",
+                "Minute",
+                "Hour"
             ]
         }
     }
