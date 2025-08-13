@@ -4,13 +4,13 @@ name: Cloud Proxy
 description: Provides access to cloud HTTP APIs and MQTT broker.
 license: Apache-2.0 license
 author: InfAI (CC SES)
-version: v0.0.9
+version: v0.0.10
 type: add-on
 deploymentType: single
 services:
   gateway:
     name: Gateway
-    image: ghcr.io/senergy-platform/mgw-cloud-proxy:0.0.10
+    image: ghcr.io/senergy-platform/mgw-cloud-proxy:0.0.11
     runConfig:
       stopTimeout: "20s"
     httpEndpoints:
@@ -83,6 +83,16 @@ configs:
       - refVar: CLOUD_CERT_BASE_URL
         services:
           - gateway
+  cm-default-network-id:
+    targets:
+      - refVar: DEFAULT_NETWORK_ID
+        services:
+          - gateway
+    userInput:
+      type: text
+      name: Default network ID
+      group: cm
+    optional: true
   cm-default-network-name:
     value: "mgw-{did}"
     targets:

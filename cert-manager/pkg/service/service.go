@@ -98,6 +98,9 @@ func (s *Service) NewNetwork(ctx context.Context, id, name, token string) error 
 	if err != nil {
 		return err
 	}
+	if id == "" {
+		id = s.config.DefaultNetworkID
+	}
 	if id != "" {
 		n, err := s.cloudClt.GetNetwork(ctx, id, token)
 		if err != nil {
