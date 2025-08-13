@@ -156,7 +156,7 @@ func getCertificateInfo(a *Api) (string, string, gin.HandlerFunc) {
 // @Tags Certificate
 // @Accept json
 // @Param Authorization header string false "jwt token"
-// @Param data body models_api.NewCertRequest true "cert data"
+// @Param data body models_api.NewCertRequest false "cert data"
 // @Success	200
 // @Failure	400 {string} string "error message"
 // @Failure	500 {string} string "error message"
@@ -164,7 +164,7 @@ func getCertificateInfo(a *Api) (string, string, gin.HandlerFunc) {
 func postNewCertificate(a *Api) (string, string, gin.HandlerFunc) {
 	return http.MethodPost, "/certificate", func(gc *gin.Context) {
 		var req models_api.NewCertRequest
-		err := gc.ShouldBindJSON(&req)
+		err := gc.ShouldBindWith(&req, jsonBinding{})
 		if err != nil {
 			_ = gc.Error(models_error.NewInputErr(err))
 			return
