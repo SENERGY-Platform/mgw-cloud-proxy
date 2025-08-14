@@ -38,7 +38,7 @@ func (s *Service) refreshNetwork(ctx context.Context, token string) (string, err
 		if tmpID == "" {
 			continue
 		}
-		n, err := s.cloudClt.GetNetwork(ctx, id, token)
+		n, err := s.cloudClt.GetNetwork(ctx, tmpID, token)
 		if err != nil {
 			var rErr *client_cloud.ResponseError
 			if errors.As(err, &rErr) && rErr.Code == http.StatusNotFound {
