@@ -18,6 +18,7 @@ COPY include/certs /opt/certs
 COPY include/certs /opt/dummy-certs
 COPY include/config/nginx.conf /etc/nginx/nginx.conf
 COPY include/config/templates /etc/nginx/templates
+COPY include/pairing /opt/pairing
 COPY include/docker-entrypoint.sh /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]

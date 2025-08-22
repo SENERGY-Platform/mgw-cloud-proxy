@@ -9,4 +9,9 @@ server {
         rewrite /api(.*) /$1 break;
         proxy_pass http://cert_manager_sock$1$is_args$args;
     }
+    location /pairing {
+        rewrite /pairing(.*) /$1 break;
+        root /opt/pairing;
+        index index.html;
+    }
 }

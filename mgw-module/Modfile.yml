@@ -4,7 +4,7 @@ name: Cloud Proxy
 description: Provides access to cloud HTTP APIs and MQTT broker.
 license: Apache-2.0 license
 author: InfAI (CC SES)
-version: v0.0.12
+version: v0.0.13
 type: add-on
 deploymentType: single
 services:
@@ -67,6 +67,27 @@ configs:
       name: HTTP access log
       group: cm-log
     optional: true
+  cm-cloud-auth-url:
+    targets:
+      - refVar: KEYCLOAK_URL
+        services:
+          - gateway
+    userInput:
+      type: text
+      name: Cloud Auth URL
+      group: cm
+  cm-cloud-auth-realm:
+    value: "master"
+    targets:
+      - refVar: KEYCLOAK_REALM
+        services:
+          - gateway
+  cm-cloud-auth-client:
+    value: "master"
+    targets:
+      - refVar: KEYCLOAK_CLIENT_ID
+        services:
+          - gateway
   cm-cloud-api-token-base-url:
     targets:
       - refVar: CLOUD_TOKEN_BASE_URL

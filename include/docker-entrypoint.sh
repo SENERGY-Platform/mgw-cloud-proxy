@@ -44,6 +44,9 @@ if [ "$1" = "nginx" ] || [ "$1" = "nginx-debug" ]; then
     fi
 fi
 
+envsubst < /opt/pairing/index.html.template > /opt/pairing/index.html
+envsubst < /opt/pairing/pairing.js.template > /opt/pairing/pairing.js
+
 ./opt/cert-manager/bin -deploy
 
 set +e

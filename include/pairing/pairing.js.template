@@ -1,0 +1,50 @@
+import Keycloak from './keycloak.js';
+
+const keycloak = new Keycloak({
+    url: "$KEYCLOAK_URL",
+    realm: "$KEYCLOAK_REALM",
+    clientId: "$KEYCLOAK_CLIENT_ID"
+});
+
+
+(async () => {
+    try {
+        const authenticated = await keycloak.init({
+            onLoad: 'login-required',
+        });
+        if (authenticated) {
+            const headers = [
+                ["Authorization", `Bearer ${keycloak.token}`],
+            ];
+            const response = await fetch("../api/refresh", { method: "PATCH", headers });
+            if (response.ok) {
+                close();
+                // Most likely browser prevents close, since window was not opened by script. Therefore, show a success message
+                const outer = document.createElement("div");
+                outer.style.display = 'flex';
+                outer.style.justifyContent = 'center';
+                const div = document.createElement("div");
+                outer.appendChild(div);
+                const h = document.createElement("h2")
+                div.appendChild(h);
+                h.innerText = "✓ Successfully paired!"
+                const p = document.createElement("p")
+                div.appendChild(p);
+                p.innerText = "You can close this window now.";
+                div.style = "background-color: #31c42c;";
+                div.style.width = "fit-content";
+                div.style.textAlign = "center";
+                div.style.fontFamily = 'sans-serif';
+                div.style.padding = '1em';
+                document.body.appendChild(outer);
+            } else {
+                const j = await response.json();
+                alert("Unable to provide token: " + JSON.stringify(j));
+            }
+        } else {
+            alert('User is not authenticated');
+        }
+    } catch (error) {
+        alert('Failed to initialize adapter: ' + error);
+    }
+})()
