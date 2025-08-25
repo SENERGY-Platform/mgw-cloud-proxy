@@ -132,7 +132,11 @@
                             const tokenData = await tokenResponse.json();
 
                             // Step 4: Call the refresh endpoint with the obtained token
-                            const refreshResponse = await fetch("api/refresh", {
+                            let path = "api/refresh"
+                            if (window.location.pathname.endsWith('manager')) {
+                                path = "manager/" + path;
+                            }
+                            const refreshResponse = await fetch(path, {
                                 method: "PATCH",
                                 headers: {
                                     "Authorization": `Bearer ${tokenData.access_token}`
